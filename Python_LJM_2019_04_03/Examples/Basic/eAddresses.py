@@ -30,13 +30,14 @@ UINT32 = ljm.constants.UINT32
 # read serial number,
 # read product ID,
 # and read firmware version.
-numFrames = 6
+numFrames = 7
 # [DAC0, TEST_UINT16, TEST_UINT16, SERIAL_NUMBER, PRODUCT_ID, FIRMWARE_VERSION]
-aAddresses = [1000, 55110, 55110, 60028, 60000, 60004]
-aDataTypes = [FLOAT32, UINT16, UINT16, UINT32, FLOAT32, FLOAT32]
-aWrites = [WRITE, WRITE, READ, READ, READ, READ]
-aNumValues = [1, 1, 1, 1, 1, 1]
-aValues = [2.5, 12345, 0, 0, 0, 0]
+aAddresses = [1002, 1000, 55110, 55110, 60028, 60000, 60004]
+aDataTypes = [FLOAT32, FLOAT32, UINT16, UINT16, UINT32, FLOAT32, FLOAT32]
+
+aWrites = [WRITE, WRITE, WRITE, READ, READ, READ, READ]
+aNumValues = [1, 1, 1, 1, 1, 1, 1]
+aValues = [2.0, 3.0, 12345, 0, 0, 0, 0]
 results = ljm.eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites,
                          aNumValues, aValues)
 
