@@ -1,5 +1,6 @@
 from labjack import ljm
 import time
+import sys
 
 # Open first USB connected found LabJack
 handle = ljm.openS("ANY", "USB", "ANY")
@@ -23,10 +24,32 @@ RAM0addr = 46000
 # --  USER_RAM1 = amplitude in mm (R addr. = 46002)
 RAM1addr = 46002
 
+######################################
+## Pushes linear stage outwards, inwards, back outwards if start position is around 0
+## Else, only inwards and outwards
+######################################
+
 f_datatype = ljm.constants.FLOAT32
+offsetV = 2.5
 
-ljm.eWriteAddress(handle, DAC1addr, f_datatype, 2.5)
+ljm.eWriteAddress(handle, DAC0addr, f_datatype, offsetV)
 
-time.sleep(2)
+# Return to beginning
+print("Initial pos AIN0 is : ", ljm.eReadAddress(handle, AIN0addr, f_datatype))
+ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV + 2)
 
-ljm.eWriteAddress(handle, DAC1addr, f_datatype, -2.5)
+time.sleep(4)
+
+# If reached start
+print("AIN0 is : ", ljm.eReadAddress(handle, AIN0addr, f_datatype))
+if ljm.eReadAddress(handle, AIN0addr, f_datatype) >= 5:
+	print("End reached")
+	ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV - 2)
+
+time.sleep(4)
+
+# Reached pos start
+if ljm.eReadAddress(handle, AIN0addr, f_datatype) <= 1:
+	print("back at start")
+	ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV + 2)
+	sys.exit(0)
