@@ -1573,7 +1573,7 @@
           <SimpleData Name="ExpertMode" Value="False" />
           <SimpleData Name="BeforeResetUnsupported" Value="False" />
           <SimpleData Name="ClosedLoopSettingsCondition" Value="1" />
-          <SimpleData Name="ClosedLoopEditMode" Value="1" />
+          <SimpleData Name="ClosedLoopEditMode" Value="4" />
           <ComplexData Name="CurrentControl">
             <SimpleData Name="Gain" Value="3.9" />
             <SimpleData Name="TimeConstant" Value="0.54" />

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="Festo.FCT.FestoConfigurationTool.Project.xsl"?>
-<PROJECT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="Motor_control_FCT" Title="saurus" Creation="2020-09-17" Author="flore" Version="V1.0.0" LastModification="2020-09-17T12:51:51.5282422+02:00" SystemOfMeasurement="metric" xmlns="http://Festo.FCT.FestoConfigurationTool.Project">
+<PROJECT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="Motor_control_FCT" Title="saurus" Creation="2020-09-17" Author="flore" Version="V1.0.0" LastModification="2020-09-22T10:37:26.5345792+02:00" SystemOfMeasurement="metric" xmlns="http://Festo.FCT.FestoConfigurationTool.Project">
   <DESCRIPTION>goeie versie</DESCRIPTION>
   <ATTRIBUTES>
     <ATTRIBUTE Name="SelectedTabIndex" Value="1" />
