@@ -1,2 +1,8 @@
+# .gitignore for Brachyosaurus project
 
+# Don't track the content of these folders
 .idea/
+.vscode/
+
+# Don't track these files
+.DS_Store

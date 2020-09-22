@@ -9,4 +9,3 @@ result = ljm.eReadName(handle, name)
 
 print("\neReadName result: ")
 print("    %s = %s" % (name, result))
-
