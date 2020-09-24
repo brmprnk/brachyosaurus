@@ -30,18 +30,3 @@ print("\n    test 3: DAC0 = 1, DAC1 = 1")
 ljm.eWriteAddress(handle, 1000, f_datatype, 1*sc)
 ljm.eWriteAddress(handle, 1002, f_datatype, 1*sc)
 time.sleep(2)
-#
-# print("\n    test -1: DAC0 = -1, DAC1 = 0")
-# ljm.eWriteAddress(handle, 1000, f_datatype, -1*sc)
-# ljm.eWriteAddress(handle, 1002, f_datatype, 0)
-# time.sleep(1)
-#
-# print("\n    test -2: DAC0 = 0, DAC1 = -1")
-# ljm.eWriteAddress(handle, 1000, f_datatype, 0)
-# ljm.eWriteAddress(handle, 1002, f_datatype, -1*sc)
-# time.sleep(1)
-#
-# print("\n    test -3: DAC0 = -1, DAC1 = -1")
-# ljm.eWriteAddress(handle, 1000, f_datatype, -1*sc)
-# ljm.eWriteAddress(handle, 1002, f_datatype, -1*sc)
-# time.sleep(1)
