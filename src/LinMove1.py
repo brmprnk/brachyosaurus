@@ -11,6 +11,7 @@ result = ljm.eReadName(handle, name)
 
 print("\neReadName result: ")
 print("    %s = %s" % (name, result))
+print("\n")
 
 # --Connections:
 # --  AIN0 = position (0-10V) (R addr. = 0)
@@ -32,24 +33,30 @@ RAM1addr = 46002
 f_datatype = ljm.constants.FLOAT32
 offsetV = 2.5
 
-ljm.eWriteAddress(handle, DAC0addr, f_datatype, offsetV)
+ljm.eWriteAddress(handle, DAC0addr, f_datatype, offsetV)    	# reference voltage
 
 # Return to beginning
-print("Initial pos AIN0 is : ", ljm.eReadAddress(handle, AIN0addr, f_datatype))
-ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV + 2)
+initpos = ljm.eReadAddress(handle, AIN0addr, f_datatype)
+print("Initial pos AIN0 is : ", initpos)
+for i in range(10):
+	if ljm.eReadAddress(handle,AIN0addr, f_datatype) != initpos:
+		ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV+5)
+		print(str(i) + "th pos AIN0 is : " + str(ljm.eReadAddress(handle, AIN0addr, f_datatype)))
+# time.sleep(4)
+#
+# # If reached start
+# print("AIN0 is : ", ljm.eReadAddress(handle, AIN0addr, f_datatype))
+# if ljm.eReadAddress(handle, AIN0addr, f_datatype) >= 5:
+# 	print("End reached")
+# 	ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV - 2)
+#
+# time.sleep(4)
+#
+# # Reached pos start
+# if ljm.eReadAddress(handle, AIN0addr, f_datatype) <= 1:
+# 	print("back at start")
+# 	ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV + 2)
+# 	sys.exit(0)
 
-time.sleep(4)
-
-# If reached start
-print("AIN0 is : ", ljm.eReadAddress(handle, AIN0addr, f_datatype))
-if ljm.eReadAddress(handle, AIN0addr, f_datatype) >= 5:
-	print("End reached")
-	ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV - 2)
-
-time.sleep(4)
-
-# Reached pos start
-if ljm.eReadAddress(handle, AIN0addr, f_datatype) <= 1:
-	print("back at start")
-	ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV + 2)
-	sys.exit(0)
+ljm.close(handle)
+print("\n LABjack T7 closed")

@@ -41,4 +41,4 @@ print("Welcome, please Load an example to get started!")
 --Send questions and feedback to support@labjack.com
 
 print("Exiting Lua Script")
---MB.W(6000, 1, 0)
+MB.W(6000, 1, 0)
