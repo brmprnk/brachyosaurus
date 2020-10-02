@@ -29,9 +29,9 @@ DAC1addr = 1002
 ######################################
 #   #   # TESTING initials
 endloc = 0			# mm
-startloc = 0		# mm
+startloc = 10		# mm
 speed = 0			# mm/s
-posoffset = 0.3 		#volt
+posoffset = 0.0 		#volt
 #   #   #
 
 f_datatype = ljm.constants.FLOAT32
@@ -52,16 +52,19 @@ def v2d(locv: float, position_offset) -> float:
 if startloc >= 0 :
 	print("Going to pos: ", startloc)
 	cpos = v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype),posoffset)	# read current pos
+	print(cpos)
 	if cpos > startloc :
 		while cpos > startloc :
-			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV-2.5)
-			cpos = v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype),posoffset)
-	else :
-		while cpos < startloc :
 			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV+2.5)
 			cpos = v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype),posoffset)
+			print(cpos)
+	else :
+		while cpos < startloc :
+			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV-2.5)
+			cpos = v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype),posoffset)
+			print(cpos)
 else :
-	print("Holding stage in current pos: ", v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype), posoffset)
+	print("Holding stage in current pos: ", v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype), posoffset))
 
 ljm.close(handle)
 print("\n LABjack T7 closed")
