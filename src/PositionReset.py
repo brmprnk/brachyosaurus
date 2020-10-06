@@ -1,5 +1,4 @@
 from labjack import ljm
-import time
 import sys
 
 # Open any found LabJack
@@ -19,12 +18,12 @@ ljm.eWriteAddress(handle, 1002, f_datatype, offsetV - 1)
 # time.sleep(2)
 
 while True:
-    print("Reset: current position: ", ljm.eReadAddress(handle, 0, f_datatype))
+    print("Reset: current position: [V] ", ljm.eReadAddress(handle, 0, f_datatype))
     if round(ljm.eReadAddress(handle, 0, f_datatype), 3) <= 0.032 :
         print("Reset: End reached")
         ljm.eWriteAddress(handle, 1000, f_datatype, offsetV)
         ljm.eWriteAddress(handle, 1002, f_datatype, 0)
-        print("Reset: final position: ", ljm.eReadAddress(handle, 0, f_datatype))
+        print("Reset: final position: [V] ", ljm.eReadAddress(handle, 0, f_datatype))
 
         ljm.close(handle)
         sys.exit(0)
