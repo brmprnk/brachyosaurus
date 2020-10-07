@@ -1,8 +1,14 @@
 # .gitignore for Brachyosaurus project
 
+# Byte-compuled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
 # Don't track the content of these folders
 .idea/
 .vscode/
+output/
 
 # Don't track these files
 .DS_Store
+*.icloud
