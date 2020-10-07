@@ -113,17 +113,17 @@ while true do
     if cposV > tposV then 
       LJ.IntervalConfig(2,40)
       while true do
-        MB.W(1002,3, offsetV-speed)
+        MB.W(1002,3, offsetV-speed*2)
         if LJ.CheckInterval(2) then
           MB.W(1002,3, offsetV)
           break
         end
       end
     elseif cposV < tposV then 
-      LJ.IntervalConfig(2,40)
+      LJ.IntervalConfig(3,40)
       while true do
         MB.W(1002,3, offsetV+speed)
-        if LJ.CheckInterval(2) then
+        if LJ.CheckInterval(3) then
           MB.W(1002,3, offsetV)
           break
         end

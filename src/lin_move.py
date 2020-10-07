@@ -89,9 +89,16 @@ def move_to_pos(init_pos: int, target_pos: int, move_speed: float) -> None:
     # Enable program
     ljm.eWriteAddress(handle, 46008, f_datatype, 1)
     while True:
-        new_pos = logger.request_input("\nSet a new position to move towards (mm) : ")
+        new_pos = int(logger.request_input("\nSet a new position to move towards (mm) : "))
+        logger.info("Moving towards {} mm".format(new_pos))
         time.sleep(0.5)
         ljm.eWriteAddress(handle, 46002, f_datatype, new_pos)
+        i = 0
+        while i < 5:
+            print("DAC0: ", ljm.eReadAddress(handle, 1000, f_datatype))
+            print("DAC1: ", ljm.eReadAddress(handle, 1002, f_datatype))
+
+            i += 1
 
 
 

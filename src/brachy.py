@@ -65,7 +65,7 @@ def main() -> None:
     if subparser == "FESTO":
         linear_stage(parser)
     else:
-        brachy_therapy(parser)
+        PARSER.print_help()
 
 def brachy_therapy(args: argparse.Namespace) -> None:
     """

@@ -24,8 +24,9 @@ def general_information(parser: argparse.Namespace) -> str:
     :return:        str                 General information represented as a string.
     """
     # TVLA.
+    result = "\n"
     if parser.subparse == "FESTO":
-        result = "Running Linear Stage Control Module..."
+        result += "Running Linear Stage Control Module..."
 
 	# Add new subparsers or extra inputs (speed, initLoc) here
 
@@ -40,7 +41,7 @@ def extra_arguments(parser: argparse.Namespace) -> str:
     """
 
     result = "\n"
-    if parser.position:
-        result += "FESTO Initial Position = " +str(parser.position)
+    # if parser.position:
+    #     result += "FESTO Initial Position = " +str(parser.position)
 
     return result
