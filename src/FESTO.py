@@ -36,7 +36,7 @@ speed = 0			# mm/s
 
 f_datatype = ljm.constants.FLOAT32
 offsetV = 2.5 				# (offsetV+2.5V on DAC1 = 25 mm/s)
-offV = 0.0299544557929039 	# low voltage that T7 can certainly output
+offV = 0 	# low voltage that T7 can certainly output
 maxpos = 50					# mm
 minpos = 3					# mm
 
@@ -62,14 +62,14 @@ if startloc >= 0:
 	print("POS_SET: cpos =", cpos)
 	if cpos > startloc :
 		while cpos > startloc :
-			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV-1)
+			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV-0.5)
 			cpos = v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype))
 			print("POS_SET: + running...", cpos)
 		ljm.eWriteAddress(handle, DAC0addr, f_datatype, offV)
 		ljm.eWriteAddress(handle, DAC1addr, f_datatype, offV)
 	elif cpos < startloc:
 		while cpos < startloc :
-			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV+1)
+			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV+0.5)
 			cpos = v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype))
 			print("POS_SET: - running...", cpos)
 		ljm.eWriteAddress(handle, DAC0addr, f_datatype, offV)
