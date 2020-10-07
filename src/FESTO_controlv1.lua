@@ -4,10 +4,10 @@
 -- at a speed given by RAM1
 
 --_______TESTING_____________
---MB.W(46000,3,40)
---MB.W(46002,3,20)
---MB.W(46004,3,0.5)
---MB.W(46008,3,0)
+--MB.W(46000,3,0)
+--MB.W(46002,3,60)
+--MB.W(46004,3,0.2)
+--MB.W(46008,3,1)
 
 --Scaling factors:
 --  position: 9.418 = 50.5mm
@@ -24,6 +24,9 @@
 --  USER_RAM2 = [46004] speed !has to be between 0 and 2.5!
 --  USER_RAM2 = [46008] enable signal starts the program at a positive value
 
+MB.W(1000,3,0.5)
+MB.W(1002,3,0)
+
 -- defining limits
 dmax = 50.5
 dmin = 3
@@ -35,7 +38,7 @@ outputMin = -1.5        --bounds for the output value
 outputMax = 1.5
 
 offsetV = 2.5           -- offset voltage on output (2.5V is speed 0)
-
+print("Ready for enable input")
 while true do
   enable = MB.R(46008,3)      -- check for positive enable signal
   if enable > 0 then
@@ -57,7 +60,7 @@ elseif startposV < vmin then
   end
 
 -- INIT1: move to initial position (startloc in python)
-LJ.IntervalConfig(1,3000)
+LJ.IntervalConfig(1,1500)
 print("INIT1: Going to starting position")
 while true do
   cposV = MB.R(0,3) -- current position in volt
