@@ -4,9 +4,10 @@
 -- at a speed given by RAM1
 
 --_______TESTING_____________
-MB.W(46000,3,10)
-MB.W(46002,3,50)
-MB.W(46004,3,0.1)
+--MB.W(46000,3,0)
+--MB.W(46002,3,60)
+--MB.W(46004,3,0.2)
+--MB.W(46008,3,1)
 
 --Scaling factors:
 --  position: 9.418 = 50.5mm
@@ -21,7 +22,10 @@ MB.W(46004,3,0.1)
 --  USER_RAM0 = [46000] initial position (startloc) !HAS TO BE >= 3 mm!
 --  USER_RAM1 = [46002] necessary position (endloc)
 --  USER_RAM2 = [46004] speed !has to be between 0 and 2.5!
+--  USER_RAM2 = [46008] enable signal starts the program at a positive value
 
+MB.W(1000,3,0.5)
+MB.W(1002,3,0)
 
 -- defining limits
 dmax = 50.5
@@ -30,10 +34,18 @@ vmax = 9.418
 vmin = 0.032
 --  ((dmax-dmin)/(vmax-vmin))*locv + dmin
 
-outputMin = -0.5        --bounds for the output value
-outputMax = 0.5
+outputMin = -1.5        --bounds for the output value
+outputMax = 1.5
 
 offsetV = 2.5           -- offset voltage on output (2.5V is speed 0)
+print("Ready for enable input")
+while true do
+  enable = MB.R(46008,3)      -- check for positive enable signal
+  if enable > 0 then
+    break
+  end
+end
+MB.W(46008,3,0)       -- deINIT enable
 
 -- INIT0: start with no movement
 print("Starting with no movement.")
@@ -48,7 +60,7 @@ elseif startposV < vmin then
   end
 
 -- INIT1: move to initial position (startloc in python)
-LJ.IntervalConfig(1,5000)
+LJ.IntervalConfig(1,1500)
 print("INIT1: Going to starting position")
 while true do
   cposV = MB.R(0,3) -- current position in volt
@@ -78,13 +90,13 @@ print("INIT1: routine finished")
 
 -- main running loop 
 print("Main: starting main loop")
-LJ.IntervalConfig(0, 100)             --set interval to 100 for 100ms
+LJ.IntervalConfig(0, 20)             --set interval to 100 for 100ms
 while true do
   speed = MB.R(46004,3)
   if speed > outputMax then
     speed = outputMax
   end
-  print("speed = ", speed)
+--  print("Main: speed = ", speed)
   
   targetpos = MB.R(46002,3)
   tposV = ((vmax - vmin)/(dmax-dmin))*(targetpos - dmin)
@@ -94,26 +106,32 @@ while true do
   elseif tposV < vmin then
     tposV = vmin
   end
-  print("tposV = ", tposV)
+--  print("Main: tposV = ", tposV)
   
   if LJ.CheckInterval(0) then
     cposV = MB.R(0,3)
-    while cposV > tposV do
-      cposV = MB.R(0,3)
-			MB.W(1002,3, offsetV-speed)
-			print("Main: running back... ", cposV)
+    if cposV > tposV then 
+      LJ.IntervalConfig(2,40)
+      while true do
+        MB.W(1002,3, offsetV-speed)
+        if LJ.CheckInterval(2) then
+          MB.W(1002,3, offsetV)
+          break
+        end
+      end
+    elseif cposV < tposV then 
+      LJ.IntervalConfig(2,40)
+      while true do
+        MB.W(1002,3, offsetV+speed)
+        if LJ.CheckInterval(2) then
+          MB.W(1002,3, offsetV)
+          break
+        end
+      end
     end
-    while cposV < tposV do
-			cposV = MB.R(0,3)
-			MB.W(1002,3,offsetV+speed)
-			print("Main: running forward... ", cposV)
-		end
-		if (cposV < tposV+0.02 and cposV > tposV-0.02) then 
-		  MB.W(1002,3,offsetV)
-		  print("Main: holding")
-		end
   end
 print("Main: iteration finished ", cposV)
+
 end
 
-print("end reached")
+print("Error: end reached")
