@@ -13,6 +13,8 @@ import signal
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from src.util import main_util
+from src.util import logger
+import lin_move
 
 # pylint: disable=unused-argument
 # Disable unused argument because the SIGINT event handler always takes two parameters, but for the
@@ -28,6 +30,7 @@ def async_event_handler(sig: int, frame: object) -> None:
 
     :return: None
     """
+    logger.error("\nInterrupted program execution...")
     sys.exit(sig)
 
 
@@ -40,8 +43,12 @@ SUBPARSERS = PARSER.add_subparsers(dest="subparse")
 PARSER_FESTO = SUBPARSERS.add_parser("FESTO", help="Control the FESTO linear stage")
 
 # Set FESTO Parser options
-PARSER_FESTO.add_argument("--position", type=int, default=0, action="store",
+PARSER_FESTO.add_argument("--targetpos", type=int, default=0, action="store",
+                          help="Set the desired position of the linear stage (mm)")
+PARSER_FESTO.add_argument("--initpos", type=int, default=0, action="store",
                           help="Set the initial position of the linear stage (mm)")
+PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
+                          help="Set the speed of movement (V)")
 
 
 def main() -> None:
@@ -58,7 +65,7 @@ def main() -> None:
     if subparser == "FESTO":
         linear_stage(parser)
     else:
-        brachy_therapy(parser)
+        PARSER.print_help()
 
 def brachy_therapy(args: argparse.Namespace) -> None:
     """
@@ -69,6 +76,7 @@ def linear_stage(args: argparse.Namespace) -> None:
     """
     Handler for controlling the linear stage
     """
+    lin_move.move_to_pos(args.initpos, args.targetpos, args.speed)
 
 if __name__ == '__main__':
     main()
