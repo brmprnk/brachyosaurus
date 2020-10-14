@@ -4,9 +4,9 @@
 -- at a speed given by RAM1
 
 --_______TESTING_____________
---MB.W(46000,3,0)
---MB.W(46002,3,60)
---MB.W(46004,3,0.2)
+--MB.W(46000,3,40)
+--MB.W(46002,3,10)
+--MB.W(46004,3,1.7)
 --MB.W(46008,3,1)
 
 --Scaling factors:
@@ -110,7 +110,7 @@ while true do
   
   if LJ.CheckInterval(0) then
     cposV = MB.R(0,3)
-    if cposV > tposV+1 then 
+    if cposV > tposV+0.3 then 
       LJ.IntervalConfig(2,40)
       while true do
         MB.W(1002,3, offsetV-speed*2)
@@ -119,7 +119,7 @@ while true do
           break
         end
       end
-    elseif cposV < tposV-1 then 
+    elseif cposV < tposV-0.3 then 
       LJ.IntervalConfig(3,40)
       while true do
         MB.W(1002,3, offsetV+speed)
@@ -127,6 +127,7 @@ while true do
           MB.W(1002,3, offsetV)
           break
         end
+      end
     elseif cposV > tposV then 
       LJ.IntervalConfig(2,40)
       while true do
