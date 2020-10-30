@@ -14,7 +14,8 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from src.util import main_util
 from src.util import logger
-import lin_move
+# from src import lin_move
+import src.needle as needle_controller
 
 # pylint: disable=unused-argument
 # Disable unused argument because the SIGINT event handler always takes two parameters, but for the
@@ -41,6 +42,7 @@ signal.signal(signal.SIGINT, async_event_handler)
 PARSER = argparse.ArgumentParser(prog="brachy.py", description="Program to control needle and linear stage movement")
 SUBPARSERS = PARSER.add_subparsers(dest="subparse")
 PARSER_FESTO = SUBPARSERS.add_parser("FESTO", help="Control the FESTO linear stage")
+PARSER_NEEDLE = SUBPARSERS.add_parser("NEEDLE", help="Control the movement of the needle")
 
 # Set FESTO Parser options
 PARSER_FESTO.add_argument("--targetpos", type=int, default=0, action="store",
@@ -49,6 +51,11 @@ PARSER_FESTO.add_argument("--initpos", type=int, default=0, action="store",
                           help="Set the initial position of the linear stage (mm)")
 PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
                           help="Set the speed of movement (V)")
+
+# Set NEEDLE Parser options
+PARSER_NEEDLE.add_argument("-controller", action="store_true", help="Use controller or arrowkeys as input")
+PARSER_NEEDLE.add_argument("--comport", type=str, default="/dev/tty.usbserial-141230", action="store",
+                           help="The comport on which the Arduino is connected")
 
 
 def main() -> None:
@@ -64,6 +71,8 @@ def main() -> None:
 
     if subparser == "FESTO":
         linear_stage(parser)
+    if subparser == "NEEDLE":
+        brachy_therapy(parser)
     else:
         PARSER.print_help()
 
@@ -71,12 +80,16 @@ def brachy_therapy(args: argparse.Namespace) -> None:
     """
     Handler for main purpose of program
     """
+    board_controller = needle_controller.Controller(args.comport)
+
+    # board_controller.move_freely()
+
 
 def linear_stage(args: argparse.Namespace) -> None:
     """
     Handler for controlling the linear stage
     """
-    lin_move.move_to_pos(args.initpos, args.targetpos, args.speed)
+    # lin_move.move_to_pos(args.initpos, args.targetpos, args.speed)
 
 if __name__ == '__main__':
     main()
