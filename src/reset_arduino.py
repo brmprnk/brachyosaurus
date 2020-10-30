@@ -3,12 +3,18 @@ import pyfirmata
 import time
 
 
-def func(comport):
+def func(comport, startsteps):
     stepsperrev = 24
     stepstotal = round(10/0.7*stepsperrev*1.2)
-    dir = 0
+    dirstart = 0
 
-    port = 'COM5'
+    stepsmax = 200
+    stepsmid = int(startsteps)
+    if stepsmid > stepsmax:
+        stepsmid = stepsmax
+    dirmid = 1
+
+    port = comport
     board = pyfirmata.Arduino(port)
 
     time.sleep(2)
@@ -26,11 +32,11 @@ def func(comport):
     it = pyfirmata.util.Iterator(board)
     it.start()
 
-    dirpin1.write(dir)
-    dirpin2.write(dir)
-    dirpin3.write(dir)
-    dirpin4.write(dir)
-    print("INIT: start running...")
+    dirpin1.write(dirstart)
+    dirpin2.write(dirstart)
+    dirpin3.write(dirstart)
+    dirpin4.write(dirstart)
+    print("INIT: start running to zero...")
     for x in range(stepstotal):
         steppin1.write(1)
         steppin2.write(1)
@@ -43,8 +49,25 @@ def func(comport):
         steppin4.write(0)
         time.sleep(0.005)
 
-    print("INIT: finished")
+    print("INIT: at zero")
+    dirpin1.write(dirmid)
+    dirpin2.write(dirmid)
+    dirpin3.write(dirmid)
+    dirpin4.write(dirmid)
+    print("INIT: running to mid (steps= " + str(stepsmid) + ")...")
+    for x in range(stepsmid):
+        steppin1.write(1)
+        steppin2.write(1)
+        steppin3.write(1)
+        steppin4.write(1)
+        time.sleep(0.005)
+        steppin1.write(0)
+        steppin2.write(0)
+        steppin3.write(0)
+        steppin4.write(0)
+        time.sleep(0.005)
 
+    print("INIT: currently at mid (steps= " + str(stepsmid) + "), exiting board")
     board.exit()
 
 
