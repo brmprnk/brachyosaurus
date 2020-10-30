@@ -15,7 +15,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from src.util import main_util
 from src.util import logger
 # from src import lin_move
-import src.needle as needle_controller
+#import src.needle as needle_controller
+import reset_arduino
 
 # pylint: disable=unused-argument
 # Disable unused argument because the SIGINT event handler always takes two parameters, but for the
@@ -54,7 +55,8 @@ PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
 
 # Set NEEDLE Parser options
 PARSER_NEEDLE.add_argument("-controller", action="store_true", help="Use controller or arrowkeys as input")
-PARSER_NEEDLE.add_argument("--comport", type=str, default="/dev/tty.usbserial-141230", action="store",
+PARSER_NEEDLE.add_argument("-init", action="store_true", help= "INITs Crouzet positions")
+PARSER_NEEDLE.add_argument("--comport", type=str, default="COM5", action="store",
                            help="The comport on which the Arduino is connected")
 
 
@@ -76,12 +78,14 @@ def main() -> None:
     else:
         PARSER.print_help()
 
+
 def brachy_therapy(args: argparse.Namespace) -> None:
     """
     Handler for main purpose of program
     """
-    board_controller = needle_controller.Controller(args.comport)
-
+    # board_controller = needle_controller.Controller(args.comport)
+    if args.init:
+        reset_arduino.func(args.comport)
     # board_controller.move_freely()
 
 
