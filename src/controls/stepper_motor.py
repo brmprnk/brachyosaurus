@@ -13,7 +13,7 @@ class Motor:
     def __init__(self, dirpin, movpin):
         self.dirpin = dirpin
         self.movpin = movpin
-        self.stepcounter = 0
+        self.stepcounter = 100
         logger.info("Creating new stepper motor instance:\n" +
                     "    Directional pin: {}\n".format(self.dirpin) +
                     "    Mov pin: {}\n".format(self.movpin))

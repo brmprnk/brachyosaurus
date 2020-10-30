@@ -3,7 +3,7 @@ import time
 from controls import stepper_motor, controls
 
 
-class Controller:
+class Needle:
 
     def __init__(self, comport):
         self.port = comport
@@ -35,7 +35,6 @@ class Controller:
 
     def move_freely(self):
         controller = controls.Controls()
-        
 
         # Move the needle:
         self.move_to_dir(controller.get_direction())

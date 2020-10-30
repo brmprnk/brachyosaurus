@@ -1,15 +1,18 @@
-import pyfirmata
-import time
-import sys
+"""
+Module to read inputs from Keyboard/Controller and convert the input to a direction
+"""
+
 from enum import Enum
+import sys
+import os
 import pygame
-from inputs import get_key
-from inputs import get_gamepad
-from inputs import devices
-from . import stepper_motor
-# import .. import util.logger
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+import src.util.logger as logger
 
 class Direction(Enum):
+    """
+    Enumerator for the directions
+    """
     up = 0
     upright = 1
     right = 2
@@ -20,6 +23,9 @@ class Direction(Enum):
     upleft = 7
 
 class Controls:
+    """
+    Class that encapsulates receiving inputs and returning directions
+    """
 
     def __init__(self):
         self.dir_map = {
@@ -28,8 +34,11 @@ class Controls:
             Direction.down : [0, 1],
             Direction.left : [1, 3]
         }
-    
+
     def get_direction(self):
+        """
+        Get direction from input
+        """
         pygame.init()
 
         # Check if controller connected

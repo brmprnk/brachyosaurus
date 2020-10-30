@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from src.util import main_util
 from src.util import logger
 # from src import lin_move
-import src.needle as needle_controller
+import src.needle as needle
 import reset_arduino
 
 # pylint: disable=unused-argument
@@ -85,11 +85,13 @@ def brachy_therapy(args: argparse.Namespace) -> None:
     """
     Handler for main purpose of program
     """
-    board_controller = needle_controller.Controller(args.comport)
     if args.init:
         reset_arduino.func(args.comport, args.startsteps)
-
-    board_controller.move_freely()
+    else:
+        # Create Needle object
+        board_controller = needle.Needle(args.comport)
+        # Call its movement function
+        board_controller.move_freely()
 
 
 def linear_stage(args: argparse.Namespace) -> None:
