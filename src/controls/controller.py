@@ -1,7 +1,7 @@
 """
 Module to read inputs from Keyboard/Controller and convert the input to a direction
 """
-
+# pylint: disable=no-member
 from enum import Enum
 import sys
 import math
@@ -66,11 +66,8 @@ class Controller:
 
             for event in events:
                 # End loop when escape is pressed
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    run = False
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    pygame.quit()
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                    sys.exit()
                     run = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     up_arrow = pressed[pygame.K_UP]
@@ -98,21 +95,18 @@ class Controller:
         if up_arrow:
             if left_arrow:
                 return Direction.upleft.value
-            elif right_arrow:
+            if right_arrow:
                 return Direction.upright.value
-            else:
-                return Direction.up.value
-        elif down_arrow:
+            return Direction.up.value
+        if down_arrow:
             if left_arrow:
                 return Direction.downleft.value
-            elif right_arrow:
+            if right_arrow:
                 return Direction.downright.value
-            else:
-                return Direction.down.value
-        elif left_arrow:
+            return Direction.down.value
+        if left_arrow:
             return Direction.left.value
-        else:
-            return Direction.right.value
+        return Direction.right.value
 
     # pylint: disable=too-many-return-statements
     def analog_stick_to_dir(self, x_coord: float, y_coord: float) -> int:
@@ -129,28 +123,21 @@ class Controller:
             logger.error("Direction not clear --> Analog stick not far away from center. Try again.")
             return Direction.NULL.value
 
-        # A small difference in absolute value indicates a diagonal
         abs_diff = abs(abs_x - abs_y)
+        # A small difference in absolute value indicates a diagonal
         if abs_diff < self.diagonal_margin:
             if x_coord > 0:
                 if y_coord > 0:
                     return Direction.upright.value
-                else:
-                    return Direction.downright.value
-            else:
-                if y_coord > 0:
-                    return Direction.upleft.value
-                else:
-                    return Direction.downleft.value
+                return Direction.downright.value
+            if y_coord > 0:
+                return Direction.upleft.value
+            return Direction.downleft.value
         # If not a diagonal then one of four cardinals
-        else:
-            if abs_y > abs_x:
-                if (y_coord > 0):
-                    return Direction.up.value
-                else:
-                    return Direction.down.value
-            else:
-                if x_coord > 0:
-                    return Direction.right.value
-                else:
-                    return Direction.left.value
+        if abs_y > abs_x:
+            if y_coord > 0:
+                return Direction.up.value
+            return Direction.down.value
+        if x_coord > 0:
+            return Direction.right.value
+        return Direction.left.value
