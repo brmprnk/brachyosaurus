@@ -65,6 +65,6 @@ def write_to_log(message: str) -> None:
     # Get the path of output file
     path = os.path.join(project_path, LOG_PATH)
 
-    file = open(path, "a")
+    file = open(path, "w")
     file.write(str(dt.datetime.now().replace(microsecond=0)) + ": " + message + "\n")
     file.close()
