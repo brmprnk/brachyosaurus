@@ -33,6 +33,20 @@ def error(message: str) -> None:
 
     write_to_log(message)
 
+def success(message: str) -> None:
+    """
+    This functions is used for all output that is used as success message.
+    This prints in green.
+    :param message: The success message to be printed
+    :return: None
+    """
+    if "win32" in sys.platform.lower():
+        print(message)
+    else:
+        print("\033[1;32mERROR: %s\033[0;0m" % message)
+
+    write_to_log(message)
+
 
 def request_input(message: str) -> str:
     """
