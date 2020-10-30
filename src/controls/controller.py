@@ -16,6 +16,7 @@ class Direction(Enum):
     """
     Enumerator for the directions
     """
+    NULL = -1
     up = 0
     upright = 1
     right = 2
@@ -26,24 +27,25 @@ class Direction(Enum):
     upleft = 7
 
 
-class Controls:
+class Controller:
     """
     Class that encapsulates receiving inputs and returning directions
     """
-
-    def __init__(self):
-        pygame.init()
-
-        # Check if controller connected
-        if pygame.joystick.get_count() > 0:
-            print("found joystick")
-            joystick = pygame.joystick.Joystick(0)
-            joystick.init()
 
     def get_direction(self):
         """
         Get direction from input
         """
+        pygame.init()
+
+        logger.info("Initializing input methods...")
+
+        # Check if controller connected
+        if pygame.joystick.get_count() > 0:
+            joystick = pygame.joystick.Joystick(0)
+            joystick.init()
+            logger.success("Controller connected : " + joystick.get_name())
+
         run = True
         while run:
 
@@ -75,33 +77,37 @@ class Controls:
                     right_arrow = pressed[pygame.K_RIGHT]
 
                     return self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow)
-               
+
                 if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
                     print("Pressed the A button")
                     print("So print all controller events")
                     print(events)
                     return 0
 
+    @staticmethod
+    # pylint: disable=too-many-return-statements
+    def arrowkeys_to_dir(up_arrow: bool, down_arrow: bool, left_arrow: bool, right_arrow: bool) -> int:
+        """
+        Function that converts arrowkey presses (at most 2 simultaneously) to a direction in range 0..7 including
+        """
+        if not up_arrow and not down_arrow and not left_arrow and not right_arrow:
+            return Direction.NULL.value
 
-    def arrowkeys_to_dir(self, up, down, left, right):
-        if not up and not down and not left and not right:
-            return None
-
-        if up:
-            if left:
+        if up_arrow:
+            if left_arrow:
                 return Direction.upleft.value
-            elif right:
+            elif right_arrow:
                 return Direction.upright.value
             else:
                 return Direction.up.value
-        if down:
-            if left:
+        elif down_arrow:
+            if left_arrow:
                 return Direction.downleft.value
-            elif right:
+            elif right_arrow:
                 return Direction.downright.value
             else:
                 return Direction.down.value
-        if left:
+        elif left_arrow:
             return Direction.left.value
-        if right:
+        else:
             return Direction.right.value

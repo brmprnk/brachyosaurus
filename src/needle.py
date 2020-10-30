@@ -1,6 +1,8 @@
 import pyfirmata
 import time
-from controls import stepper_motor, controls
+import sys
+from controls import stepper_motor, controller
+import util.logger as logger
 
 
 class Needle:
@@ -34,10 +36,17 @@ class Needle:
         return return_value
 
     def move_freely(self):
-        controller = controls.Controls()
+        input_method = controller.Controller()
+
+        direction = input_method.get_direction()
+
+        if (direction == -1):
+            logger.error("No valid input given --> Undefined direction")
+            sys.exit(1)
+            
 
         # Move the needle:
-        self.move_to_dir(controller.get_direction())
+        self.move_to_dir(direction)
     
     def move_to_dir(self, direction):
         """
