@@ -40,6 +40,7 @@ class Controller:
         """
         Get direction from input
         """
+        logger.info("Specify direction for needle movement: ")
         pygame.init()
 
         # Check if controller connected

@@ -62,10 +62,10 @@ class Needle:
 
         direction = input_method.get_direction()
 
-        if (direction == -1):
-            logger.error("No valid input given --> Undefined direction")
-            sys.exit(1)
-            
+        # Check if faulty input and try again
+        while (direction == -1):
+            time.sleep(0.5) # Sleep to make sure button is unpressed
+            direction = input_method.get_direction()
 
         # Move the needle:
         self.move_to_dir(direction)
