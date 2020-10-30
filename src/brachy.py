@@ -89,7 +89,7 @@ def brachy_therapy(args: argparse.Namespace) -> None:
         reset_arduino.func(args.comport, args.startsteps)
     else:
         # Create Needle object
-        board_controller = needle.Needle(args.comport)
+        board_controller = needle.Needle(args.comport, args.startsteps)
         # Call its movement function
         board_controller.move_freely()
 
