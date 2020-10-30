@@ -35,10 +35,10 @@ class Controller:
 
     def move_freely(self):
         controller = controls.Controls()
-        controller.get_direction()
+        
 
         # Move the needle:
-        self.move_to_dir(direction)
+        self.move_to_dir(controller.get_direction())
     
     def move_to_dir(self, direction):
         """
