@@ -4,6 +4,7 @@ Module to read inputs from Keyboard/Controller and convert the input to a direct
 
 from enum import Enum
 import sys
+import math
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
@@ -31,14 +32,15 @@ class Controller:
     """
     Class that encapsulates receiving inputs and returning directions
     """
+    def __init__(self) -> None:
+        self.deadzone = 0.8
+        self.diagonal_margin = 0.4
 
-    def get_direction(self):
+    def get_direction(self) -> int:
         """
         Get direction from input
         """
         pygame.init()
-
-        logger.info("Initializing input methods...")
 
         # Check if controller connected
         if pygame.joystick.get_count() > 0:
@@ -63,7 +65,6 @@ class Controller:
 
             for event in events:
                 # End loop when escape is pressed
-                print(event)
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     run = False
@@ -80,9 +81,8 @@ class Controller:
 
                 if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
                     print("Pressed the A button")
-                    print("So print all controller events")
-                    print(events)
-                    return 0
+                    return self.analog_stick_to_dir(joystick.get_axis(0), joystick.get_axis(1) * -1)
+
 
     @staticmethod
     # pylint: disable=too-many-return-statements
@@ -91,6 +91,7 @@ class Controller:
         Function that converts arrowkey presses (at most 2 simultaneously) to a direction in range 0..7 including
         """
         if not up_arrow and not down_arrow and not left_arrow and not right_arrow:
+            logger.error("Direction not clear --> No arrowkeys pressed. Try again.")
             return Direction.NULL.value
 
         if up_arrow:
@@ -111,3 +112,44 @@ class Controller:
             return Direction.left.value
         else:
             return Direction.right.value
+
+    # pylint: disable=too-many-return-statements
+    def analog_stick_to_dir(self, x_coord: float, y_coord: float) -> int:
+        """
+        Maps the (x, y) coordinate of the analog stick to one of 8 possible directions;
+        the cardinals and diagonals.
+        """
+        abs_x = abs(x_coord)
+        abs_y = abs(y_coord)
+
+        # If the direction is not clear enough (stick not far away from center)
+        distance_from_origin = math.sqrt(pow(abs_x, 2) + pow(abs_y, 2))
+        if distance_from_origin < self.deadzone:
+            logger.error("Direction not clear --> Analog stick not far away from center. Try again.")
+            return Direction.NULL.value
+
+        # A small difference in absolute value indicates a diagonal
+        abs_diff = abs(abs_x - abs_y)
+        if abs_diff < self.diagonal_margin:
+            if x_coord > 0:
+                if y_coord > 0:
+                    return Direction.upright.value
+                else:
+                    return Direction.downright.value
+            else:
+                if y_coord > 0:
+                    return Direction.upleft.value
+                else:
+                    return Direction.downleft.value
+        # If not a diagonal then one of four cardinals
+        else:
+            if abs_y > abs_x:
+                if (y_coord > 0):
+                    return Direction.up.value
+                else:
+                    return Direction.down.value
+            else:
+                if x_coord > 0:
+                    return Direction.right.value
+                else:
+                    return Direction.left.value

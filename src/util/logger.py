@@ -27,11 +27,11 @@ def error(message: str) -> None:
     :return: None
     """
     if "win32" in sys.platform.lower():
-        print(message)
+        print("ERROR: " + message)
     else:
         print("\033[1;31mERROR: %s\033[0;0m" % message)
 
-    write_to_log(message)
+    write_to_log("ERROR: " + message)
 
 def success(message: str) -> None:
     """
@@ -41,11 +41,11 @@ def success(message: str) -> None:
     :return: None
     """
     if "win32" in sys.platform.lower():
-        print(message)
+        print("SUCCESS: " + message)
     else:
         print("\033[1;32mERROR: %s\033[0;0m" % message)
 
-    write_to_log(message)
+    write_to_log("SUCCESS: " + message)
 
 
 def request_input(message: str) -> str:
