@@ -76,7 +76,6 @@ class Controller:
                 # End loop when escape is pressed
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     sys.exit()
-                    run = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     up_arrow = pressed[pygame.K_UP]
                     down_arrow = pressed[pygame.K_DOWN]

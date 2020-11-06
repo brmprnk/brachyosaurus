@@ -49,13 +49,13 @@ class Needle:
         Initializes default motor to Arduino board configuration
         """
         motor0 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(3)),
-                                    self.board.get_pin('d:{}:o'.format(2)), self.startcount)
+                                    self.board.get_pin('d:{}:o'.format(2)), self.startcount, 0)
         motor1 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(5)),
-                                    self.board.get_pin('d:{}:o'.format(4)), self.startcount)
+                                    self.board.get_pin('d:{}:o'.format(4)), self.startcount, 1)
         motor2 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(7)),
-                                    self.board.get_pin('d:{}:o'.format(6)), self.startcount)
+                                    self.board.get_pin('d:{}:o'.format(6)), self.startcount, 2)
         motor3 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(9)),
-                                    self.board.get_pin('d:{}:o'.format(8)), self.startcount)
+                                    self.board.get_pin('d:{}:o'.format(8)), self.startcount, 3)
         self.motors.extend([motor0, motor1, motor2, motor3])
 
 
@@ -80,16 +80,17 @@ class Needle:
         """
         input_method = controller.Controller()
 
-        direction = input_method.get_direction()
-
-        # Check if faulty input and try again
-        while direction == -1:
-            time.sleep(0.5) # Sleep to make sure button is unpressed
+        while True:
             direction = input_method.get_direction()
 
-        # Move the needle:
-        logger.success("Moving to : {}".format(input_method.dir_to_text(direction)))
-        self.move_to_dir(direction)
+            # Check if faulty input and try again
+            while direction == -1:
+                time.sleep(0.5) # Sleep to make sure button is unpressed
+                direction = input_method.get_direction()
+
+            # Move the needle:
+            logger.success("Moving to : {}".format(input_method.dir_to_text(direction)))
+            self.move_to_dir(direction)
 
     def move_to_dir(self, direction):
         """
@@ -97,13 +98,9 @@ class Needle:
         """
         steps_per_control = 24
 
-        print("Moving to : ", direction)
         # TODO: change from testing default to working section for all motors
 
-        if direction == 0:
-            for motor in self.dirpull[direction]:
-                self.motors[motor].run_backward(steps_per_control)
-            for motor in self.dirpush[direction]:
-                self.motors[motor].run_forward(steps_per_control)
-        else:
-            self.motors[0].runBackward(200)
+        for motor in self.dirpull[direction]:
+            self.motors[motor].run_backward(steps_per_control)
+        for motor in self.dirpush[direction]:
+            self.motors[motor].run_forward(steps_per_control)
