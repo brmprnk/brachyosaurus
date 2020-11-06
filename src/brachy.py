@@ -3,18 +3,24 @@ The main file for the Brachyosaurus project.
 The arguments entered into the Command-Line Interface (CLI) are parsed here,
 and based on those arguments the required functionalities are called.
 
+Adding functionalities is as easy as adding a small parser using the argparse library,
+and creating a function here that calls the functionalities. We've tried to keep as much of the
+logic outside this file, only setup functions are required.
+
 Authors:
     Florens Helfferich       F.J.Helfferich@student.tudelft.nl
     Bram Pronk               I.B.Pronk@student.tudelft.nl
 """
 import argparse
 import os
-import signal
 import sys
+import signal
+
+# sys.path.append is used to import local modules from the project.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-from src.util import main_util
+from src.util import input_processing
 from src.util import logger
-# from src import lin_move
+from src.util.saving import Saving
 import src.needle as needle
 import reset_arduino
 
@@ -45,7 +51,7 @@ SUBPARSERS = PARSER.add_subparsers(dest="subparse")
 PARSER_FESTO = SUBPARSERS.add_parser("FESTO", help="Control the FESTO linear stage")
 PARSER_NEEDLE = SUBPARSERS.add_parser("NEEDLE", help="Control the movement of the needle")
 
-# Set FESTO Parser options
+# Parser for the FESTO command with all the options
 PARSER_FESTO.add_argument("--targetpos", type=int, default=0, action="store",
                           help="Set the desired position of the linear stage (mm)")
 PARSER_FESTO.add_argument("--initpos", type=int, default=0, action="store",
@@ -53,8 +59,7 @@ PARSER_FESTO.add_argument("--initpos", type=int, default=0, action="store",
 PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
                           help="Set the speed of movement (V)")
 
-# Set NEEDLE Parser options
-PARSER_NEEDLE.add_argument("-controller", action="store_true", help="Use controller or arrowkeys as input")
+# Parser for the NEEDLE command with all the options
 PARSER_NEEDLE.add_argument("-init", action="store_true", help= "INITs Crouzet positions")
 PARSER_NEEDLE.add_argument("--comport", type=str, default="COM5", action="store",
                            help="The comport on which the Arduino is connected")
@@ -64,12 +69,13 @@ PARSER_NEEDLE.add_argument("--startsteps", type=str, default="100", action="stor
 
 def main() -> None:
     """
-    Parse input and call appropriate function
+    The start of the program. This function determines from user input which function handlerit should call.
 
     :return: None
     """
+    # Print all the user's entered arguments in a neatly organized fashion
     parser = PARSER.parse_args()
-    main_util.input_log(parser)
+    input_processing.input_log(parser)
 
     subparser = parser.subparse
 
