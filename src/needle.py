@@ -3,7 +3,9 @@ Manager file for the steerable needle.
 """
 import time
 import pyfirmata
-from src.controls import stepper_motor, controller
+from src.controls import stepper_motor
+from src.controls import controller
+from src.util import logger
 
 
 class Needle:
@@ -86,6 +88,7 @@ class Needle:
             direction = input_method.get_direction()
 
         # Move the needle:
+        logger.success("Moving to : {}".format(input_method.dir_to_text(direction)))
         self.move_to_dir(direction)
 
     def move_to_dir(self, direction):
