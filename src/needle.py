@@ -4,7 +4,8 @@ Manager file for the steerable needle.
 import time
 import pyfirmata
 from src.controls import stepper_motor
-from src.controls import controller
+#from src.controls import controller
+from src.controls.controller import Output,Controller
 from src.util import logger
 
 
@@ -18,30 +19,30 @@ class Needle:
     def __init__(self, comport, startsteps):
         self.port = comport
         self.startcount = startsteps
-        self.board = pyfirmata.Arduino(self.port)
+        #self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
         self.motors = []
-        self.default_motor_setup()
+        #self.default_motor_setup()
         self.dirpull = {
-            0:[0,1],
-            1:[1],
-            2:[1,3],
-            3:[3],
-            4:[2,3],
-            5:[2],
-            6:[0,2],
-            7:[0],
+
+            1:[0,1],
+
+            3:[0,3],
+
+            5:[2,3],
+
+            7:[2,1],
         }
 
         self.dirpush = {
-            0: [2, 3],
-            1: [2],
-            2: [0, 2],
-            3: [0],
-            4: [0, 1],
-            5: [1],
-            6: [1, 3],
-            7: [3],
+
+            1: [2,3],
+
+            3: [2,1],
+
+            5: [0,1],
+
+            7: [0,3],
         }
 
     def default_motor_setup(self):
@@ -64,7 +65,7 @@ class Needle:
         Add specific stepper_motor to Motor array
         """
         motor = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(dirpin)),
-                                    self.board.get_pin('d:{}:o'.format(steppin)), startcount)
+                                    self.board.get_pin('d:{}:o'.format(steppin)), startcount, index)
         self.motors.insert(index, motor)
 
     def remove_motor(self, index):
@@ -78,29 +79,31 @@ class Needle:
         """
         Handler for needle movement
         """
-        input_method = controller.Controller()
+        input_method = Controller()
 
         while True:
-            direction = input_method.get_direction()
+            dirOutput = input_method.get_direction()
 
             # Check if faulty input and try again
-            while direction == -1:
+            while dirOutput.direction == -1:
                 time.sleep(0.5) # Sleep to make sure button is unpressed
                 direction = input_method.get_direction()
 
             # Move the needle:
-            logger.success("Moving to : {}".format(input_method.dir_to_text(direction)))
-            self.move_to_dir(direction)
+            logger.success("Moving to : {}".format(input_method.dir_to_text(dirOutput.direction)))
+            self.move_to_dir(dirOutput)
 
-    def move_to_dir(self, direction):
+    def move_to_dir(self, gdo):
         """
         Krijg een richting --> Stuur de motors
+        gdo = get direction output (an object of the class Output)
         """
         steps_per_control = 24
 
-        # TODO: change from testing default to working section for all motors
+        motorpull = self.dirpull[gdo.direction]
+        motorpush = self.dirpush[gdo.direction]
+        self.motors[motorpull[0]].run_backward(gdo.stepsx)
+        self.motors[motorpull[1]].run_backward(gdo.stepsy)
+        self.motors[motorpush[0]].run_forward(gdo.stepsx)
+        self.motors[motorpush[1]].run_forward(gdo.stepsy)
 
-        for motor in self.dirpull[direction]:
-            self.motors[motor].run_backward(steps_per_control)
-        for motor in self.dirpush[direction]:
-            self.motors[motor].run_forward(steps_per_control)
