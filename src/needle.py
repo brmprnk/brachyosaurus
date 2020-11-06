@@ -19,10 +19,10 @@ class Needle:
     def __init__(self, comport, startsteps):
         self.port = comport
         self.startcount = startsteps
-        #self.board = pyfirmata.Arduino(self.port)
+        self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
         self.motors = []
-        #self.default_motor_setup()
+        self.default_motor_setup()
         self.dirpull = {
 
             1:[0,1],
