@@ -35,19 +35,27 @@ class Controller:
     def __init__(self) -> None:
         self.deadzone = 0.8
         self.diagonal_margin = 0.4
+        self.joystick = None
+    
+    def get_input_method(self) -> None:
+        if pygame.joystick.get_count() > 0:
+            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
+            logger.success("Controller connected : " + self.joystick.get_name())
+            logger.info("While holding the left stick pointed towards a direction, press the A button to confirm your choice.")
+        else:
+            logger.info("A Keyboard is connected.")
+            logger.info("While pressing the arrowkeys to a desired direction, press the Return (Enter) Key to confirm tou choice.")
 
     def get_direction(self) -> int:
         """
         Get direction from input
         """
-        logger.info("Specify direction for needle movement: ")
         pygame.init()
 
-        # Check if controller connected
-        if pygame.joystick.get_count() > 0:
-            joystick = pygame.joystick.Joystick(0)
-            joystick.init()
-            logger.success("Controller connected : " + joystick.get_name())
+        # Check input method
+        self.get_input_method()
+        logger.info("\nSpecify a direction for needle movement : ")
 
         run = True
         while run:
@@ -78,8 +86,7 @@ class Controller:
                     return self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow)
 
                 if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
-                    print("Pressed the A button")
-                    return self.analog_stick_to_dir(joystick.get_axis(0), joystick.get_axis(1) * -1)
+                    return self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1)
 
 
     @staticmethod
@@ -141,3 +148,6 @@ class Controller:
         if x_coord > 0:
             return Direction.right.value
         return Direction.left.value
+
+    def dir_to_text(self, direction) -> str:
+        return Direction(direction)
