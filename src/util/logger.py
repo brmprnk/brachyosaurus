@@ -27,11 +27,25 @@ def error(message: str) -> None:
     :return: None
     """
     if "win32" in sys.platform.lower():
-        print(message)
+        print("ERROR: " + message)
     else:
         print("\033[1;31mERROR: %s\033[0;0m" % message)
 
-    write_to_log(message)
+    write_to_log("ERROR: " + message)
+
+def success(message: str) -> None:
+    """
+    This functions is used for all output that is used as success message.
+    This prints in green.
+    :param message: The success message to be printed
+    :return: None
+    """
+    if "win32" in sys.platform.lower():
+        print("SUCCESS: " + message)
+    else:
+        print("\033[1;32mERROR: %s\033[0;0m" % message)
+
+    write_to_log("SUCCESS: " + message)
 
 
 def request_input(message: str) -> str:
@@ -65,6 +79,6 @@ def write_to_log(message: str) -> None:
     # Get the path of output file
     path = os.path.join(project_path, LOG_PATH)
 
-    file = open(path, "a")
+    file = open(path, "w")
     file.write(str(dt.datetime.now().replace(microsecond=0)) + ": " + message + "\n")
     file.close()
