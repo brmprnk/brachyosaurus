@@ -5,7 +5,7 @@ import time
 import pyfirmata
 from src.controls import stepper_motor
 #from src.controls import controller
-from src.controls.controller import Output,Controller
+from src.controls.controller import Output, Controller
 from src.util import logger
 
 
@@ -91,8 +91,12 @@ class Needle:
                 direction = input_method.get_direction()
 
             # Move the needle:
-            logger.success("Moving to : {}".format(input_method.dir_to_text(dirOutput.direction)))
-            self.move_to_dir(dirOutput)
+            if dirOutput.direction == 100:
+                logger.success("Init called: moving to zero then to 100 steps")
+                self.initial_position()
+            else:
+                logger.success("Moving to : {}".format(input_method.dir_to_text(dirOutput.direction)))
+                self.move_to_dir(dirOutput)
 
     def move_to_dir(self, gdo):
         """
@@ -109,3 +113,14 @@ class Needle:
         self.motors[motorpush[0]].run_forward(sx)
         self.motors[motorpush[1]].run_forward(sy)
 
+    def initial_position(self):
+        """
+        Stuur de motoren terug naar 100
+        """
+        for motor_i in range(len(self.motors)):
+            position = self.motors[motor_i].get_count()
+            steps_diff = abs(100 - position)
+            if position > 100:
+                self.motors[motor_i].run_backward(steps_diff)
+            else:
+                self.motors[motor_i].run_forward(steps_diff)

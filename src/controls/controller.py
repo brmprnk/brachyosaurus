@@ -91,6 +91,8 @@ class Controller:
 
                 if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
                     return self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1)
+                if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
+                    return Output(100, [100, 100])
 
 
     @staticmethod
