@@ -99,7 +99,7 @@ class Needle:
         Krijg een richting --> Stuur de motors
         gdo = get direction output (an object of the class Output)
         """
-        steps_per_control = 24
+
         sx = round(self.sensitivity*gdo.stepsx)
         sy = round(self.sensitivity*gdo.stepsy)
         motorpull = self.dirpull[gdo.direction]
