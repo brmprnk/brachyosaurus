@@ -137,8 +137,8 @@ class Controller:
             return Direction.NULL.value
 
         # xy_coords to steps to output per x or y motors
-        x_steps = round(abs_x*50)
-        y_steps = round(abs_y*50)
+        x_steps = round(abs_x*100)
+        y_steps = round(abs_y*100)
         stepsout = [x_steps, y_steps]
         print('CONTROLLER: stepsout = ', stepsout)
 

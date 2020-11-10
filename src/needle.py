@@ -16,9 +16,10 @@ class Needle:
     Functions as a manager for the program, always knows what is the status.
     """
 
-    def __init__(self, comport, startsteps):
+    def __init__(self, comport, startsteps, sensitivity):
         self.port = comport
         self.startcount = startsteps
+        self.sensitivity = sensitivity
         self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
         self.motors = []
@@ -99,11 +100,12 @@ class Needle:
         gdo = get direction output (an object of the class Output)
         """
         steps_per_control = 24
-
+        sx = round(self.sensitivity*gdo.stepsx)
+        sy = round(self.sensitivity*gdo.stepsy)
         motorpull = self.dirpull[gdo.direction]
         motorpush = self.dirpush[gdo.direction]
-        self.motors[motorpull[0]].run_backward(gdo.stepsx)
-        self.motors[motorpull[1]].run_backward(gdo.stepsy)
-        self.motors[motorpush[0]].run_forward(gdo.stepsx)
-        self.motors[motorpush[1]].run_forward(gdo.stepsy)
+        self.motors[motorpull[0]].run_backward(sx)
+        self.motors[motorpull[1]].run_backward(sy)
+        self.motors[motorpush[0]].run_forward(sx)
+        self.motors[motorpush[1]].run_forward(sy)
 

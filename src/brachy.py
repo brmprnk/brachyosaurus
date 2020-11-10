@@ -65,6 +65,8 @@ PARSER_NEEDLE.add_argument("--comport", type=str, default="COM5", action="store"
                            help="The comport on which the Arduino is connected")
 PARSER_NEEDLE.add_argument("--startsteps", type=str, default="100", action="store",
                            help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
+PARSER_NEEDLE.add_argument("--sensitivity", type=str, default="1", action="store",
+                           help="The sensitivity of the needle controls (between 0 and 1) ")
 
 
 def main() -> None:
@@ -95,7 +97,7 @@ def brachy_therapy(args: argparse.Namespace) -> None:
         reset_arduino.func(args.comport, args.startsteps)
     else:
         # Create Needle object
-        board_controller = needle.Needle(args.comport, args.startsteps)
+        board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
         # Call its movement function
         board_controller.move_freely()
 
