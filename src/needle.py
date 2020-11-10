@@ -19,7 +19,7 @@ class Needle:
     def __init__(self, comport, startsteps, sensitivity):
         self.port = comport
         self.startcount = startsteps
-        self.sensitivity = sensitivity
+        self.sensitivity = float(sensitivity)
         self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
         self.motors = []
