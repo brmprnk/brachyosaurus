@@ -22,12 +22,20 @@ class Motor:
                     "    Initial stepcount: {}\n".format(self.stepcounter))
 
 
-    def get_count(self):
+    def get_count(self) ->int:
         """
         Getter for self.stepcounter
         """
-        print("STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
+        print(str(self.index) + "STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
         return self.stepcounter
+
+    def set_count(self, steps_done):
+        """
+        Setter for self.stepcounter
+        """
+        self.stepcounter = self.stepcounter + steps_done
+        print(str(self.index) + "STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
+
 
 
     def run_forward(self, runsteps):

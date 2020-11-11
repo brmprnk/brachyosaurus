@@ -4,8 +4,8 @@ Manager file for the steerable needle.
 import time
 import pyfirmata
 from src.controls import stepper_motor
-#from src.controls import controller
-from src.controls.controller import Output, Controller
+# from src.controls import controller
+from src.controls.controller import Controller
 from src.util import logger
 
 
@@ -25,25 +25,25 @@ class Needle:
         self.motors = []
         self.default_motor_setup()
         self.dirpull = {
-            0:[1],
-            1:[0,1],
-            2:[0],
-            3:[0,3],
-            4:[3],
-            5:[2,3],
-            6:[2],
-            7:[2,1],
+            0: [1],
+            1: [0, 1],
+            2: [0],
+            3: [0, 3],
+            4: [3],
+            5: [2, 3],
+            6: [2],
+            7: [2, 1],
         }
 
         self.dirpush = {
             0: [3],
-            1: [2,3],
+            1: [2, 3],
             2: [2],
-            3: [2,1],
+            3: [2, 1],
             4: [1],
-            5: [0,1],
+            5: [0, 1],
             6: [0],
-            7: [0,3],
+            7: [0, 3],
         }
 
     def default_motor_setup(self):
@@ -51,15 +51,18 @@ class Needle:
         Initializes default motor to Arduino board configuration
         """
         motor0 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(3)),
-                                    self.board.get_pin('d:{}:o'.format(2)), self.startcount, 0)
+                                     self.board.get_pin('d:{}:o'.format(2)),
+                                     self.startcount, 0)
         motor1 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(5)),
-                                    self.board.get_pin('d:{}:o'.format(4)), self.startcount, 1)
+                                     self.board.get_pin('d:{}:o'.format(4)),
+                                     self.startcount, 1)
         motor2 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(7)),
-                                    self.board.get_pin('d:{}:o'.format(6)), self.startcount, 2)
+                                     self.board.get_pin('d:{}:o'.format(6)),
+                                     self.startcount, 2)
         motor3 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(9)),
-                                    self.board.get_pin('d:{}:o'.format(8)), self.startcount, 3)
+                                     self.board.get_pin('d:{}:o'.format(8)),
+                                     self.startcount, 3)
         self.motors.extend([motor0, motor1, motor2, motor3])
-
 
     def add_motor(self, dirpin, steppin, startcount, index):
         """
@@ -118,7 +121,6 @@ class Needle:
             self.motors[motorpull[0]].run_backward(sx)      # steps for one axis is always 100 in x and y
             self.motors[motorpush[0]].run_forward(sx)
 
-
     def initial_position(self):
         """
         Stuur de motoren terug naar 100
@@ -131,11 +133,10 @@ class Needle:
             else:
                 self.motors[motor_i].run_forward(steps_diff)
 
-
     def move_to_dir_sync(self, gdo):
         """
         Krijg een richting --> Stuur de motors synchroon
-        doe een stap op motor 1 dan op 2 dan 3 dan 4 tot alle stappen zijn bereikt
+        doe één stap op motor 1 dan op 2 dan 3 dan 4 dan weer één op 1 etc tot alle stappen zijn bereikt
         gdo = get direction output (an object of the class Output(direction, stepsout) )
         """
 
@@ -152,7 +153,7 @@ class Needle:
 
         # writing to the movpins in one while loop
         total_steps = sx+sy
-        print('NEEDLE->move_to_dir_sync: starting to move sync... \n            total_steps =', total_steps)
+        print('NEEDLE->move_to_dir_sync: starting to move sync...  total_steps =', total_steps)
         count = 0
         xcount = 0
         ycount = 0
@@ -174,4 +175,9 @@ class Needle:
                 self.motors[motorpull[1]].movpin.write(0)
                 self.motors[motorpush[1]].movpin.write(0)
             count = xcount + ycount
-            print('NEEDLE->move_to_dir_sync: Movement finished.')
+        # setting stepcounters to current positions
+        self.motors[motorpull[0]].set_count(-1*sx)
+        self.motors[motorpull[1]].set_count(-1 * sy)
+        self.motors[motorpush[0]].set_count(sx)
+        self.motors[motorpush[1]].set_count(sy)
+        print('NEEDLE->move_to_dir_sync: Movement finished.')
