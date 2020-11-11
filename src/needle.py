@@ -25,24 +25,24 @@ class Needle:
         self.motors = []
         self.default_motor_setup()
         self.dirpull = {
-
+            0:[1],
             1:[0,1],
-
+            2:[0],
             3:[0,3],
-
+            4:[3],
             5:[2,3],
-
+            6:[2],
             7:[2,1],
         }
 
         self.dirpush = {
-
+            0: [3],
             1: [2,3],
-
+            2: [2],
             3: [2,1],
-
+            4: [1],
             5: [0,1],
-
+            6: [0],
             7: [0,3],
         }
 
@@ -108,10 +108,16 @@ class Needle:
         sy = round(self.sensitivity*gdo.stepsy)
         motorpull = self.dirpull[gdo.direction]
         motorpush = self.dirpush[gdo.direction]
-        self.motors[motorpull[0]].run_backward(sx)
-        self.motors[motorpull[1]].run_backward(sy)
-        self.motors[motorpush[0]].run_forward(sx)
-        self.motors[motorpush[1]].run_forward(sy)
+        # run the motors, if motorpull is length 2 than so is motorpush, otherwise run only one axis (keyboard only)
+        if len(motorpull) > 1:
+            self.motors[motorpull[0]].run_backward(sx)
+            self.motors[motorpull[1]].run_backward(sy)
+            self.motors[motorpush[0]].run_forward(sx)
+            self.motors[motorpush[1]].run_forward(sy)
+        else:
+            self.motors[motorpull[0]].run_backward(sx)      # steps for one axis is always 100 in x and y
+            self.motors[motorpush[0]].run_forward(sx)
+
 
     def initial_position(self):
         """
@@ -124,3 +130,48 @@ class Needle:
                 self.motors[motor_i].run_backward(steps_diff)
             else:
                 self.motors[motor_i].run_forward(steps_diff)
+
+
+    def move_to_dir_sync(self, gdo):
+        """
+        Krijg een richting --> Stuur de motors synchroon
+        doe een stap op motor 1 dan op 2 dan 3 dan 4 tot alle stappen zijn bereikt
+        gdo = get direction output (an object of the class Output(direction, stepsout) )
+        """
+
+        sx = round(self.sensitivity * gdo.stepsx)
+        sy = round(self.sensitivity * gdo.stepsy)
+
+        # setting directions for each motor (pulling = 0, pushing = 1)
+        motorpull = self.dirpull[gdo.direction]
+        motorpush = self.dirpush[gdo.direction]
+        self.motors[motorpull[0]].dirpin.write(0)
+        self.motors[motorpull[1]].dirpin.write(0)
+        self.motors[motorpush[0]].dirpin.write(1)
+        self.motors[motorpush[1]].dirpin.write(1)
+
+        # writing to the movpins in one while loop
+        total_steps = sx+sy
+        print('NEEDLE->move_to_dir_sync: starting to move sync... \n            total_steps =', total_steps)
+        count = 0
+        xcount = 0
+        ycount = 0
+        while True:
+            if count > total_steps:
+                break
+            if xcount < sx:
+                xcount = xcount + 1
+                self.motors[motorpull[0]].movpin.write(1)
+                self.motors[motorpush[0]].movpin.write(1)
+                time.sleep(0.005)
+                self.motors[motorpull[0]].movpin.write(0)
+                self.motors[motorpush[0]].movpin.write(0)
+            if ycount < sy:
+                ycount = ycount + 1
+                self.motors[motorpull[1]].movpin.write(1)
+                self.motors[motorpush[1]].movpin.write(1)
+                time.sleep(0.005)
+                self.motors[motorpull[1]].movpin.write(0)
+                self.motors[motorpush[1]].movpin.write(0)
+            count = xcount + ycount
+            print('NEEDLE->move_to_dir_sync: Movement finished.')

@@ -71,7 +71,7 @@ class Controller:
                 down_arrow = keyboard.is_pressed('down')
                 left_arrow = keyboard.is_pressed('left')
                 right_arrow = keyboard.is_pressed('right')
-                return self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow)
+                return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
 
             # Input recorded by pygame
             pressed = pygame.key.get_pressed()
@@ -87,7 +87,7 @@ class Controller:
                     left_arrow = pressed[pygame.K_LEFT]
                     right_arrow = pressed[pygame.K_RIGHT]
 
-                    return self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow)
+                    return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
 
                 if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
                     return self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1)
@@ -136,7 +136,7 @@ class Controller:
 
         if distance_from_origin < self.deadzone:
             logger.error("Direction not clear --> Analog stick not far away from center. Try again.")
-            return Direction.NULL.value
+            return Output(Direction.NULL.value, [0, 0])
 
         # xy_coords to steps to output per x or y motors
         x_steps = round(abs_x*100)
