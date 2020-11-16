@@ -22,6 +22,7 @@ from src.util import input_processing
 from src.util import logger
 from src.util.saving import Saving
 import src.needle as needle
+import src.image_position
 import reset_arduino
 
 # pylint: disable=unused-argument
@@ -50,6 +51,7 @@ PARSER = argparse.ArgumentParser(prog="brachy.py", description="Program to contr
 SUBPARSERS = PARSER.add_subparsers(dest="subparse")
 PARSER_FESTO = SUBPARSERS.add_parser("FESTO", help="Control the FESTO linear stage")
 PARSER_NEEDLE = SUBPARSERS.add_parser("NEEDLE", help="Control the movement of the needle")
+PARSER_POSITION = SUBPARSERS.add_parser("POSITION", help="Gain feedback on the position of the needle")
 
 # Parser for the FESTO command with all the options
 PARSER_FESTO.add_argument("--targetpos", type=int, default=0, action="store",
@@ -65,6 +67,8 @@ PARSER_NEEDLE.add_argument("--comport", type=str, default="COM5", action="store"
                            help="The comport on which the Arduino is connected")
 PARSER_NEEDLE.add_argument("--startsteps", type=str, default="100", action="store",
                            help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
+# Parser for the POSITION command
+PARSER_POSITION.add_argument("-init", action="store_true", help="INITs imaging module(s) for positional feedback")
 
 
 def main() -> None:
@@ -83,6 +87,8 @@ def main() -> None:
         linear_stage(parser)
     if subparser == "NEEDLE":
         brachy_therapy(parser)
+    if subparser == "POSITION":
+        image_position(parser)
     else:
         PARSER.print_help()
 
@@ -98,6 +104,11 @@ def brachy_therapy(args: argparse.Namespace) -> None:
         board_controller = needle.Needle(args.comport, args.startsteps)
         # Call its movement function
         board_controller.move_freely()
+
+def imaging_position(args: argparse.Namespace) -> None:
+    """
+    Handler for positional feedback using image acquisition & processing
+    """
 
 
 def linear_stage(args: argparse.Namespace) -> None:
