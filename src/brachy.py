@@ -63,8 +63,8 @@ PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
 PARSER_NEEDLE.add_argument("-init", action="store_true", help= "INITs Crouzet positions")
 PARSER_NEEDLE.add_argument("--comport", type=str, default="COM5", action="store",
                            help="The comport on which the Arduino is connected")
-PARSER_NEEDLE.add_argument("--startsteps", type=str, default="100", action="store",
-                           help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
+PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="store",
+                           help="The amount of steps (max 400) performed forwards after the Crouzets are INIT at zero ")
 PARSER_NEEDLE.add_argument("--sensitivity", type=str, default="1", action="store",
                            help="The sensitivity of the needle controls (between 0 and 1) ")
 

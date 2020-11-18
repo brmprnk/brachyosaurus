@@ -167,16 +167,18 @@ class Needle:
                     xcount = xcount + 1
                     self.motors[motorpull[0]].movpin.write(1)
                     self.motors[motorpush[0]].movpin.write(1)
-                    time.sleep(0.005)
+                    time.sleep(0.01)
                     self.motors[motorpull[0]].movpin.write(0)
                     self.motors[motorpush[0]].movpin.write(0)
+                    time.sleep(0.01)
                 if ycount < sy:
                     ycount = ycount + 1
                     self.motors[motorpull[1]].movpin.write(1)
                     self.motors[motorpush[1]].movpin.write(1)
-                    time.sleep(0.005)
+                    time.sleep(0.01)
                     self.motors[motorpull[1]].movpin.write(0)
                     self.motors[motorpush[1]].movpin.write(0)
+                    time.sleep(0.01)
                 count = count + 1
             # setting stepcounters to current positions
             self.motors[motorpull[0]].set_count(-1 * sx)
@@ -191,9 +193,10 @@ class Needle:
                 time.sleep(0.01)
                 self.motors[motorpull[0]].movpin.write(0)
                 self.motors[motorpush[0]].movpin.write(0)
+                time.sleep(0.01)
             # setting stepcounters to current positions
-            self.motors[motorpull[0]].set_count(sx)
-            self.motors[motorpush[0]].set_count(-1*sx)
+            self.motors[motorpull[0]].set_count(-1*sx)
+            self.motors[motorpush[0]].set_count(sx)
         print('\nNEEDLE->move_to_dir_sync: Movement finished.')
         self.motors[0].get_count()
         self.motors[1].get_count()
