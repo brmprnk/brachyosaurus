@@ -20,7 +20,7 @@ import signal
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from src.util import input_processing
 from src.util import logger
-from src.util.saving import Saving
+# from src.util.saving import Saving
 import src.needle as needle
 import reset_arduino
 
@@ -63,8 +63,10 @@ PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
 PARSER_NEEDLE.add_argument("-init", action="store_true", help= "INITs Crouzet positions")
 PARSER_NEEDLE.add_argument("--comport", type=str, default="COM5", action="store",
                            help="The comport on which the Arduino is connected")
-PARSER_NEEDLE.add_argument("--startsteps", type=str, default="100", action="store",
-                           help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
+PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="store",
+                           help="The amount of steps (max 400) performed forwards after the Crouzets are INIT at zero ")
+PARSER_NEEDLE.add_argument("--sensitivity", type=str, default="1", action="store",
+                           help="The sensitivity of the needle controls (between 0 and 1) ")
 
 
 def main() -> None:
@@ -95,7 +97,7 @@ def brachy_therapy(args: argparse.Namespace) -> None:
         reset_arduino.func(args.comport, args.startsteps)
     else:
         # Create Needle object
-        board_controller = needle.Needle(args.comport, args.startsteps)
+        board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
         # Call its movement function
         board_controller.move_freely()
 
