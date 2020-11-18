@@ -11,22 +11,31 @@ class Motor:
     Class that represent stepper motor
     """
 
-    def __init__(self, dirpin, movpin, startcount):
+    def __init__(self, dirpin, movpin, startcount, index):
         self.dirpin = dirpin
         self.movpin = movpin
         self.stepcounter = int(startcount)
+        self.index = index
         logger.info("Creating new stepper motor instance:\n" +
                     "    Directional pin: {}\n".format(self.dirpin) +
                     "    Mov pin: {}\n".format(self.movpin) +
                     "    Initial stepcount: {}\n".format(self.stepcounter))
 
 
-    def get_count(self):
+    def get_count(self) ->int:
         """
         Getter for self.stepcounter
         """
-        print("STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
+        print(str(self.index) + "STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
         return self.stepcounter
+
+    def set_count(self, steps_done):
+        """
+        Setter for self.stepcounter
+        """
+        self.stepcounter = self.stepcounter + steps_done
+        print(str(self.index) + "STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
+
 
 
     def run_forward(self, runsteps):
@@ -43,7 +52,7 @@ class Motor:
                 self.movpin.write(0)
                 time.sleep(0.01)
             self.stepcounter = self.stepcounter + runsteps
-            print("STEPPER_MOTOR.py--> run_forward: New stepcount is: ", self.stepcounter)
+            print(str(self.index) + "STEPPER_MOTOR.py--> run_forward: Current stepcount is: ", self.stepcounter)
 
 
     def run_backward(self, runsteps):
@@ -60,4 +69,4 @@ class Motor:
                 self.movpin.write(0)
                 time.sleep(0.01)
             self.stepcounter = self.stepcounter - runsteps
-            print("STEPPER_MOTOR.py--> run_backward: New stepcount is: ", self.stepcounter)
+            print(str(self.index) + "STEPPER_MOTOR.py--> run_backward: Current stepcount is: ", self.stepcounter)

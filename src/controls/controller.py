@@ -27,13 +27,18 @@ class Direction(Enum):
     left = 6
     upleft = 7
 
+class Output:
+    def __init__(self, direction, stepsout):
+        self.direction = direction
+        self.stepsx = stepsout[0]
+        self.stepsy = stepsout[1]
 
 class Controller:
     """
     Class that encapsulates receiving inputs and returning directions
     """
     def __init__(self) -> None:
-        self.deadzone = 0.8
+        self.deadzone = 0.2
         self.diagonal_margin = 0.4
         self.joystick = None
     
@@ -45,9 +50,9 @@ class Controller:
             logger.info("While holding the left stick pointed towards a direction, press the A button to confirm your choice.")
         else:
             logger.info("A Keyboard is connected.")
-            logger.info("While pressing the arrowkeys to a desired direction, press the Return (Enter) Key to confirm tou choice.")
+            logger.info("While pressing the arrowkeys to a desired direction, press the Return (Enter) Key to confirm thou choice.")
 
-    def get_direction(self) -> int:
+    def get_direction(self):
         """
         Get direction from input
         """
@@ -66,7 +71,7 @@ class Controller:
                 down_arrow = keyboard.is_pressed('down')
                 left_arrow = keyboard.is_pressed('left')
                 right_arrow = keyboard.is_pressed('right')
-                return self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow)
+                return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
 
             # Input recorded by pygame
             pressed = pygame.key.get_pressed()
@@ -76,17 +81,18 @@ class Controller:
                 # End loop when escape is pressed
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     sys.exit()
-                    run = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     up_arrow = pressed[pygame.K_UP]
                     down_arrow = pressed[pygame.K_DOWN]
                     left_arrow = pressed[pygame.K_LEFT]
                     right_arrow = pressed[pygame.K_RIGHT]
 
-                    return self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow)
+                    return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
 
                 if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
                     return self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1)
+                if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
+                    return Output(100, [100, 100])
 
 
     @staticmethod
@@ -116,38 +122,39 @@ class Controller:
         return Direction.right.value
 
     # pylint: disable=too-many-return-statements
-    def analog_stick_to_dir(self, x_coord: float, y_coord: float) -> int:
+    def analog_stick_to_dir(self, x_coord: float, y_coord: float):
         """
-        Maps the (x, y) coordinate of the analog stick to one of 8 possible directions;
-        the cardinals and diagonals.
+        Maps the (x, y) coordinate of the analog stick to 100 different amplitudes
+        and 360 different angles (degrees) ;
         """
         abs_x = abs(x_coord)
         abs_y = abs(y_coord)
 
         # If the direction is not clear enough (stick not far away from center)
         distance_from_origin = math.sqrt(pow(abs_x, 2) + pow(abs_y, 2))
+        # steps to do according to amplitude of the joystick
+
         if distance_from_origin < self.deadzone:
             logger.error("Direction not clear --> Analog stick not far away from center. Try again.")
-            return Direction.NULL.value
+            return Output(Direction.NULL.value, [0, 0])
 
-        abs_diff = abs(abs_x - abs_y)
-        # A small difference in absolute value indicates a diagonal
-        if abs_diff < self.diagonal_margin:
-            if x_coord > 0:
-                if y_coord > 0:
-                    return Direction.upright.value
-                return Direction.downright.value
-            if y_coord > 0:
-                return Direction.upleft.value
-            return Direction.downleft.value
-        # If not a diagonal then one of four cardinals
-        if abs_y > abs_x:
-            if y_coord > 0:
-                return Direction.up.value
-            return Direction.down.value
+        # xy_coords to steps to output per x or y motors
+        x_steps = round(abs_x*100)
+        y_steps = round(abs_y*100)
+        stepsout = [x_steps, y_steps]
+        print('CONTROLLER: stepsout = ', stepsout)
+
         if x_coord > 0:
-            return Direction.right.value
-        return Direction.left.value
+            if y_coord > 0:
+                return Output(Direction.upright.value, stepsout)
+            if y_coord < 0:
+                return Output(Direction.downright.value, stepsout)
+        if x_coord < 0:
+            if y_coord < 0:
+                return Output(Direction.downleft.value, stepsout)
+            if y_coord > 0:
+                return Output(Direction.upleft.value, stepsout)
+
 
     def dir_to_text(self, direction) -> str:
         return Direction(direction)

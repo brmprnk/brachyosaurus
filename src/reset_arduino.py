@@ -5,10 +5,10 @@ import time
 
 def func(comport, startsteps):
     stepsperrev = 24
-    stepstotal = round(10/0.7*stepsperrev*1.2)
+    stepstotal = 2*round(10/0.7*stepsperrev*1.2)
     dirstart = 0
 
-    stepsmax = 200
+    stepsmax = 400
     stepsmid = int(startsteps)
     if stepsmid > stepsmax:
         stepsmid = stepsmax
@@ -42,12 +42,12 @@ def func(comport, startsteps):
         steppin2.write(1)
         steppin3.write(1)
         steppin4.write(1)
-        time.sleep(0.005)
+        time.sleep(0.01)
         steppin1.write(0)
         steppin2.write(0)
         steppin3.write(0)
         steppin4.write(0)
-        time.sleep(0.005)
+        time.sleep(0.01)
 
     print("INIT: at zero")
     dirpin1.write(dirmid)
@@ -60,16 +60,12 @@ def func(comport, startsteps):
         steppin2.write(1)
         steppin3.write(1)
         steppin4.write(1)
-        time.sleep(0.005)
+        time.sleep(0.01)
         steppin1.write(0)
         steppin2.write(0)
         steppin3.write(0)
         steppin4.write(0)
-        time.sleep(0.005)
+        time.sleep(0.01)
 
     print("INIT: currently at mid (steps= " + str(stepsmid) + "), exiting board")
     board.exit()
-
-
-# if __name__ == "__main__":
-#     func(comport)
