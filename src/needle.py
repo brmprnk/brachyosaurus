@@ -99,7 +99,7 @@ class Needle:
                 self.initial_position()
             else:
                 logger.success("Moving to : {}".format(input_method.dir_to_text(dirOutput.direction)))
-                self.move_to_dir(dirOutput)
+                self.move_to_dir_sync(dirOutput)
 
     def move_to_dir(self, gdo):
         """
@@ -146,38 +146,56 @@ class Needle:
         # setting directions for each motor (pulling = 0, pushing = 1)
         motorpull = self.dirpull[gdo.direction]
         motorpush = self.dirpush[gdo.direction]
-        self.motors[motorpull[0]].dirpin.write(0)
-        self.motors[motorpull[1]].dirpin.write(0)
-        self.motors[motorpush[0]].dirpin.write(1)
-        self.motors[motorpush[1]].dirpin.write(1)
+        if len(motorpull) > 1:
+            self.motors[motorpull[0]].dirpin.write(0)
+            self.motors[motorpull[1]].dirpin.write(0)
+            self.motors[motorpush[0]].dirpin.write(1)
+            self.motors[motorpush[1]].dirpin.write(1)
+        else:
+            self.motors[motorpull[0]].dirpin.write(0)
+            self.motors[motorpush[0]].dirpin.write(1)
 
         # writing to the movpins in one while loop
         total_steps = sx+sy
-        print('NEEDLE->move_to_dir_sync: starting to move sync...  total_steps =', total_steps)
+        print('\nNEEDLE->move_to_dir_sync: starting to move sync...  total_steps =', total_steps)
         count = 0
         xcount = 0
         ycount = 0
-        while True:
-            if count > total_steps:
-                break
-            if xcount < sx:
-                xcount = xcount + 1
+        if len(motorpull) > 1:
+            while count <= total_steps:
+                if xcount < sx:
+                    xcount = xcount + 1
+                    self.motors[motorpull[0]].movpin.write(1)
+                    self.motors[motorpush[0]].movpin.write(1)
+                    time.sleep(0.005)
+                    self.motors[motorpull[0]].movpin.write(0)
+                    self.motors[motorpush[0]].movpin.write(0)
+                if ycount < sy:
+                    ycount = ycount + 1
+                    self.motors[motorpull[1]].movpin.write(1)
+                    self.motors[motorpush[1]].movpin.write(1)
+                    time.sleep(0.005)
+                    self.motors[motorpull[1]].movpin.write(0)
+                    self.motors[motorpush[1]].movpin.write(0)
+                count = count + 1
+            # setting stepcounters to current positions
+            self.motors[motorpull[0]].set_count(-1 * sx)
+            self.motors[motorpull[1]].set_count(-1 * sy)
+            self.motors[motorpush[0]].set_count(sx)
+            self.motors[motorpush[1]].set_count(sy)
+        else:
+            while count <= sx:
+                count = count + 1
                 self.motors[motorpull[0]].movpin.write(1)
                 self.motors[motorpush[0]].movpin.write(1)
-                time.sleep(0.005)
+                time.sleep(0.01)
                 self.motors[motorpull[0]].movpin.write(0)
                 self.motors[motorpush[0]].movpin.write(0)
-            if ycount < sy:
-                ycount = ycount + 1
-                self.motors[motorpull[1]].movpin.write(1)
-                self.motors[motorpush[1]].movpin.write(1)
-                time.sleep(0.005)
-                self.motors[motorpull[1]].movpin.write(0)
-                self.motors[motorpush[1]].movpin.write(0)
-            count = xcount + ycount
-        # setting stepcounters to current positions
-        self.motors[motorpull[0]].set_count(-1*sx)
-        self.motors[motorpull[1]].set_count(-1 * sy)
-        self.motors[motorpush[0]].set_count(sx)
-        self.motors[motorpush[1]].set_count(sy)
-        print('NEEDLE->move_to_dir_sync: Movement finished.')
+            # setting stepcounters to current positions
+            self.motors[motorpull[0]].set_count(sx)
+            self.motors[motorpush[0]].set_count(-1*sx)
+        print('\nNEEDLE->move_to_dir_sync: Movement finished.')
+        self.motors[0].get_count()
+        self.motors[1].get_count()
+        self.motors[2].get_count()
+        self.motors[3].get_count()
