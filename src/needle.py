@@ -7,6 +7,7 @@ from src.controls import stepper_motor
 # from src.controls import controller
 from src.controls.controller import Controller
 from src.util import logger
+from src.imaging_position import ImageAcquisition
 
 
 class Needle:
@@ -20,10 +21,10 @@ class Needle:
         self.port = comport
         self.startcount = startsteps
         self.sensitivity = float(sensitivity)
-        self.board = pyfirmata.Arduino(self.port)
+        # self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
         self.motors = []
-        self.default_motor_setup()
+        # self.default_motor_setup()
         self.dirpull = {
             0: [1],
             1: [0, 1],
@@ -78,6 +79,40 @@ class Needle:
         """
         return_value = self.motors.pop(index)
         return return_value
+
+    def manual_brachy_therapy(self, args) -> None:
+        """
+        Handler for MANUAL Brachy Therapy, with possibility of needle tracking by two cameras.
+        """
+        input_method = Controller()
+        image_acquisition = ImageAcquisition(args.fps, args.camtop, args.camfront, args.showcamfeed)
+
+        while True:
+            camera_image = image_acquisition.retrieve_current_image()
+            if camera_image is None:
+                logger.info("Current Needle position not visible from Camera.")
+            
+            # Possible code for image processing
+            # current_pos = get_needle_pos(image_acquisition.retrieve_images())
+            # logger.info("Needle is currently at {}".format(current_pos))
+#
+            direction = input_method.get_direction()
+
+            # Check if faulty input and try again
+            while direction.direction == -1:
+                time.sleep(0.5) # Sleep to make sure button is unpressed
+                direction = input_method.get_direction()
+
+            # Move the needle:
+            if direction.direction == 100:
+                logger.success("Init called: moving to zero then to 100 steps")
+                self.initial_position()
+            else:
+                logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
+                self.move_to_dir_sync(direction)
+
+
+
 
     def move_freely(self):
         """
