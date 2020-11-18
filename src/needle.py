@@ -127,8 +127,8 @@ class Needle:
         """
         for motor_i in range(len(self.motors)):
             position = self.motors[motor_i].get_count()
-            steps_diff = abs(100 - position)
-            if position > 100:
+            steps_diff = abs(200 - position)
+            if position > 200:
                 self.motors[motor_i].run_backward(steps_diff)
             else:
                 self.motors[motor_i].run_forward(steps_diff)
