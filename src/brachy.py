@@ -109,7 +109,10 @@ def imaging_position(args: argparse.Namespace) -> None:
     """
     Handler for positional feedback using image acquisition & processing
     """
-
+    if args.init:
+        # TODO run reset camera and reset image processing
+    else:
+        # TODO run image, then processing, then feed position to brachy_therapy
 
 def linear_stage(args: argparse.Namespace) -> None:
     """
