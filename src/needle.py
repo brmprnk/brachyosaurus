@@ -3,11 +3,17 @@ Manager file for the steerable needle.
 """
 import time
 import pyfirmata
+import cv2
 from src.controls import stepper_motor
-# from src.controls import controller
+import threading
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+import pygame
 from src.controls.controller import Controller
 from src.util import logger
 from src.imaging_position import ImageAcquisition
+from queue import Queue
+from queue import LifoQueue
 
 
 class Needle:
@@ -21,10 +27,10 @@ class Needle:
         self.port = comport
         self.startcount = startsteps
         self.sensitivity = float(sensitivity)
-        # self.board = pyfirmata.Arduino(self.port)
+        self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
         self.motors = []
-        # self.default_motor_setup()
+        self.default_motor_setup()
         self.dirpull = {
             0: [1],
             1: [0, 1],
@@ -84,26 +90,54 @@ class Needle:
         """
         Handler for MANUAL Brachy Therapy, with possibility of needle tracking by two cameras.
         """
+        # Create instances of controller and image acquisition
         input_method = Controller()
-        image_acquisition = ImageAcquisition(args.fps, args.camtop, args.camfront, args.showcamfeed)
+        image_acquisition = ImageAcquisition(args.fps, args.camtop, args.camfront, args.nofeed)
 
+        # Queues allow for communication between threads. LIFO means the most recent image/input will be used
+        camera_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads camera input
+        input_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads controller input
+
+        thread_1 = threading.Thread(target = image_acquisition.retrieve_current_image, args = (camera_feed, ))
+        thread_1.name = "ImageAcquisition_thread"
+        thread_2 = threading.Thread(target = input_method.get_direction_from_keyboard, args = (input_feed, ))
+        thread_2.name = "KeyboardListener_thread"
+
+        thread_1.start()
+        thread_2.start()
+
+        pygame.init()
+
+        logger.success("Ready to receive inputs.\n")
         while True:
-            camera_image = image_acquisition.retrieve_current_image()
-            if camera_image is None:
-                logger.info("Current Needle position not visible from Camera.")
-            
+            current_frame = camera_feed.get()
+
             # Possible code for image processing
-            # current_pos = get_needle_pos(image_acquisition.retrieve_images())
-            # logger.info("Needle is currently at {}".format(current_pos))
-#
-            direction = input_method.get_direction()
+                # current_pos = get_needle_pos(current_frame)
+                # logger.info("Needle is currently at {}".format(current_pos))
+            
+            # If camera feed is shown (nofeed == false)
+            if not image_acquisition.no_cam_feed:
+                cv2.imshow("Top Camera Feed", current_frame)
+                if cv2.waitKey(1) == 27: # Escape Key exits loop
+                    cv2.destroyAllWindows()
+                    break
+
+            events = pygame.event.get()
+            input_method.get_direction_from_pygame_events(input_feed, events)
+        
+            direction = None
+            if not input_feed.empty():
+                direction = input_feed.get()
 
             # Check if faulty input and try again
-            while direction.direction == -1:
-                time.sleep(0.5) # Sleep to make sure button is unpressed
-                direction = input_method.get_direction()
+            if direction is None or input_feed.qsize() == 0:
+                continue
+            if direction.direction == -1:
+                continue
 
             # Move the needle:
+            # logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
             if direction.direction == 100:
                 logger.success("Init called: moving to zero then to 100 steps")
                 self.initial_position()
@@ -112,6 +146,14 @@ class Needle:
                 self.move_to_dir_sync(direction)
 
 
+        # Neatly exiting loop
+        print("Finished Program Execution", threading.active_count())
+        pygame.quit()
+        image_acquisition.is_running = False
+        input_method.is_running = False
+
+        thread_1.join()
+        thread_2.join()        
 
 
     def move_freely(self):

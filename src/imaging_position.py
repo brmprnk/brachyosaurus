@@ -10,12 +10,15 @@ import matplotlib.pyplot as plt
 import numpy
 import time
 from src.util import logger
+from queue import LifoQueue
+import threading
+import time
 
 class ImageAcquisition:
     """
     Class that encapsulates the functionality of retrieving images from a (live) video feed.
     """
-    def __init__(self, images_per_second: int, top_camera: str, front_camera: str, show_cam_feed: bool) -> None:
+    def __init__(self, images_per_second: int, top_camera: str, front_camera: str, no_cam_feed: bool) -> None:
         if top_camera == "" and front_camera == "":
             logger.error("No URL or Path to camera's were given --> Not able to provide visual feedback")
         
@@ -24,27 +27,24 @@ class ImageAcquisition:
 
         # Convert the nr. of images per second to an amount of frames based on videofeed
         self.images_per_second = self.top_vidcap.get(cv2.CAP_PROP_FPS) * images_per_second
-        self.show_cam_feed = show_cam_feed
+        self.no_cam_feed = no_cam_feed
+
+        self.is_running = True
     
-    def retrieve_current_image(self):
+    def retrieve_current_image(self, video_feed: LifoQueue):
         """
         Retrieves the current frame of the video feed.
         """
-        success, frame = self.top_vidcap.read()
-        if success:
-            if self.show_cam_feed:
-                cv2.imshow("Top Camera Feed", frame)
-                if cv2.waitKey(1) == 13:
-                    cv2.destroyAllWindows()
-            return frame
-
-        else:
-            logger.error("Not able to retrieve image from VideoCapture Object.")
-            
-            self.top_vidcap.release()
-            cv2.destroyAllWindows()
-
-            return None
+        logger.info("Video Feed Acquisition has started.")
+        while self.is_running:
+            success, frame = self.top_vidcap.read()
+            if success:
+                video_feed.put(frame)
+            else:
+                logger.error("Not able to retrieve image from VideoCapture Object.")
+                
+                self.top_vidcap.release()
+                cv2.destroyAllWindows()
 
     def live_image(self):
         """
