@@ -2,18 +2,18 @@
 Manager file for the steerable needle.
 """
 import time
-import pyfirmata
-import cv2
-from src.controls import stepper_motor
 import threading
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+from queue import LifoQueue
+import pyfirmata
+import cv2
 import pygame
+
+from src.controls import stepper_motor
 from src.controls.controller import Controller
 from src.util import logger
-from src.imaging_position import ImageAcquisition
-from queue import Queue
-from queue import LifoQueue
+from src.image_acquisition import ImageAcquisition
 
 
 class Needle:
@@ -168,7 +168,7 @@ class Needle:
             # Check if faulty input and try again
             while dirOutput.direction == -1:
                 time.sleep(0.5) # Sleep to make sure button is unpressed
-                direction = input_method.get_direction()
+                dirOutput = input_method.get_direction()
 
             # Move the needle:
             if dirOutput.direction == 100:

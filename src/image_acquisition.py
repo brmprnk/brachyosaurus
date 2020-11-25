@@ -5,14 +5,9 @@ This file finds the X,Y coordinates of the needle using the tasks:
     - returning X,Y positions
 """
 
-import cv2
-import matplotlib.pyplot as plt
-import numpy
-import time
-from src.util import logger
 from queue import LifoQueue
-import threading
-import time
+import cv2
+from src.util import logger
 
 class ImageAcquisition:
     """
