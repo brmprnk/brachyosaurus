@@ -15,6 +15,7 @@ import argparse
 import os
 import sys
 import signal
+import threading
 
 # sys.path.append is used to import local modules from the project.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -40,6 +41,8 @@ def async_event_handler(sig: int, frame: object) -> None:
     :return: None
     """
     logger.error("\nInterrupted program execution...")
+    for thread in threading.enumerate(): 
+        print("Thread running on shutdown: ", thread.name)
     sys.exit(sig)
 
 
@@ -69,7 +72,7 @@ PARSER.add_argument("--camtop", action="store", type=str, default="https://192.1
                     help="The URL or path to the (live) video of the camera positioned above the needle")
 PARSER.add_argument("--camfront", action="store", type=str, default="",
                     help="The URL or path to the (live) video of the camera positioned in front of the needle")
-PARSER.add_argument("-showcamfeed", action="store_true", help="Should the camera feed be displayed on screen")
+PARSER.add_argument("-nofeed", action="store_true", help="Should the camera feed be displayed on screen")
 
 # Parser for the FESTO command with all the options
 PARSER_FESTO.add_argument("--targetpos", type=int, default=0, action="store",
@@ -118,10 +121,13 @@ def brachy_therapy(args: argparse.Namespace) -> None:
     if args.init:
         reset_arduino.func(args.comport, args.startsteps)
     else:
+        logger.success("Starting Brachy Therapy.\n")
+
         # Create Needle object
         board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
         # Call its movement function
         if args.manual:
+            logger.info("Input type is MANUAL.")
             board_controller.manual_brachy_therapy(args)
 
 def needle_movement(args: argparse.Namespace) -> None:
