@@ -15,6 +15,7 @@ import argparse
 import os
 import sys
 import signal
+from configparser import ConfigParser
 
 # sys.path.append is used to import local modules from the project.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -23,6 +24,7 @@ from src.util import logger
 # from src.util.saving import Saving
 import src.needle as needle
 import reset_arduino
+from src.image_pos.image_proc2 import read, position_feedback
 
 # pylint: disable=unused-argument
 # Disable unused argument because the SIGINT event handler always takes two parameters, but for the
@@ -50,6 +52,7 @@ PARSER = argparse.ArgumentParser(prog="brachy.py", description="Program to contr
 SUBPARSERS = PARSER.add_subparsers(dest="subparse")
 PARSER_FESTO = SUBPARSERS.add_parser("FESTO", help="Control the FESTO linear stage")
 PARSER_NEEDLE = SUBPARSERS.add_parser("NEEDLE", help="Control the movement of the needle")
+PARSER_IMAGEPOS = SUBPARSERS.add_parser("IMAGEPOS", help="Control the camera and image processing")
 
 # Parser for the FESTO command with all the options
 PARSER_FESTO.add_argument("--targetpos", type=int, default=0, action="store",
@@ -68,6 +71,12 @@ PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="stor
 PARSER_NEEDLE.add_argument("--sensitivity", type=str, default="1", action="store",
                            help="The sensitivity of the needle controls (between 0 and 1) ")
 
+# Parser for the IMAGEPOS command with all the options
+PARSER_IMAGEPOS.add_argument("--configpath", type=str, default="config.ini", action="store",
+                           help="The path to the config file")
+PARSER_IMAGEPOS.add_argument("--imagepath", type=str, default="image_pos/photos/bending2.jpg", action="store",
+                           help="The path to the config file")
+
 
 def main() -> None:
     """
@@ -85,6 +94,8 @@ def main() -> None:
         linear_stage(parser)
     if subparser == "NEEDLE":
         brachy_therapy(parser)
+    if subparser == "IMAGEPOS":
+        image_pos(parser)
     else:
         PARSER.print_help()
 
@@ -107,6 +118,20 @@ def linear_stage(args: argparse.Namespace) -> None:
     Handler for controlling the linear stage
     """
     # lin_move.move_to_pos(args.initpos, args.targetpos, args.speed)
+
+
+def image_pos(args: argparse.Namespace) -> None:
+    """"
+    Handler for the camera and image processing
+    """
+    config_object = ConfigParser()
+    config_object.read(args.configpath)
+    imagepos = config_object["IMAGEPOS"]
+    print( imagepos["lower_threshold"])
+    tuple1, tuple2 = position_feedback(args.imagepath, args.configpath, show='yes')
+    print("tuple1 is: ", tuple1)
+    print("tuple2 is: ", tuple2)
+
 
 if __name__ == '__main__':
     main()
