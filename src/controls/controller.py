@@ -65,12 +65,12 @@ class Controller:
         Receives a list of PYGAME events, that will be analyzed and then an appropriate direction is added to a Queue.
         """
         pressed = pygame.key.get_pressed()
-        
+
         for event in events:
             # End loop when escape is pressed
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.is_running = False
-                pygame.quit()
+                input_feed.put(None) # Sentinel Value
             # Pygame ArrowKey Handler
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 up_arrow = pressed[pygame.K_UP]

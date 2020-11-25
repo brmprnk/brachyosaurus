@@ -4,8 +4,6 @@ This file finds the X,Y coordinates of the needle using the tasks:
     - image processing
     - returning X,Y positions
 """
-
-from queue import LifoQueue
 import cv2
 from src.util import logger
 
@@ -17,39 +15,44 @@ class ImageAcquisition:
         if top_camera == "" and front_camera == "":
             logger.error("No URL or Path to camera's were given --> Not able to provide visual feedback")
         
-        self.top_vidcap = cv2.VideoCapture("http://192.168.43.1:8080/video")
-        # TODO: self.front_vidcap = cv2.VideoCapture(front_camera)
+        self.top_vid_link = "http://192.168.43.1:8080/video"
+        # TODO: self.front_vid_link = front_camera
 
-        # Convert the nr. of images per second to an amount of frames based on videofeed
-        self.images_per_second = self.top_vidcap.get(cv2.CAP_PROP_FPS) * images_per_second
+        self.images_per_second = images_per_second
         self.no_cam_feed = no_cam_feed
 
-        self.is_running = True
+        self.is_running = True # Bool to be modified from main loop, that ends loop
     
-    def retrieve_current_image(self, video_feed: LifoQueue):
+    def retrieve_current_image(self, video_feed):
         """
-        Retrieves the current frame of the video feed.
+        Produces an image feed. This video feed is output to the screen using imshow().
+        The user sets the amount of frames the logic uses, that amount of frames is used for
+        image processing logic. These frames are added to the video_feed Queue
         """
+        top_vidcap = cv2.VideoCapture(self.top_vid_link)
+        # Number of images per second expressed in nr of frames between images
+        # (so 25 fps and 2 images per second leads to one image every 12 frames, for example)
+        produce_image_frame = top_vidcap.get(cv2.CAP_PROP_FPS) / self.images_per_second
+
         logger.info("Video Feed Acquisition has started.")
         while self.is_running:
-            success, frame = self.top_vidcap.read()
+            frame_nr = top_vidcap.get(1) # Current frame of the video feed
+            success, frame = top_vidcap.read()
             if success:
-                video_feed.put(frame)
+                # If camera feed is shown (nofeed == false)
+                if not self.no_cam_feed:
+                    cv2.imshow("Top Camera Feed", frame)
+                    if cv2.waitKey(1) == 27: # Escape Key exits loop
+                        top_vidcap.release()
+                        cv2.destroyAllWindows()
+                        video_feed.put(None) # Sentinel Value to end main program loop
+                        break
+                if frame_nr % produce_image_frame == 0: # Only show if the frame corresponds to desired images_per_second
+                    video_feed.put(frame)
             else:
                 logger.error("Not able to retrieve image from VideoCapture Object.")
                 
-                self.top_vidcap.release()
+                top_vidcap.release()
                 cv2.destroyAllWindows()
-
-    def live_image(self):
-        """
-        Returns the live image of the camera feed.
-        """
-        frame_nr = self.top_vidcap.get(1) # Current frame of the video feed
-        success, frame = self.top_vidcap.read()
-        if frame_nr % self.images_per_second == 0: # Only show if the frame corresponds to desired images_per_second
-            if success:
-                return pic
-                # cv2.imshow('bier', pic)
-                # if cv2.waitKey(1) == 13:
-                #     break
+                video_feed.put(None) # Sentinel Value to end main program loop
+                break

@@ -3,11 +3,11 @@ Manager file for the steerable needle.
 """
 import time
 import threading
+import multiprocessing
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from queue import LifoQueue
 import pyfirmata
-import cv2
 import pygame
 
 from src.controls import stepper_motor
@@ -95,49 +95,52 @@ class Needle:
         image_acquisition = ImageAcquisition(args.fps, args.camtop, args.camfront, args.nofeed)
 
         # Queues allow for communication between threads. LIFO means the most recent image/input will be used
-        camera_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads camera input
+        camera_feed = multiprocessing.Queue(maxsize=0) # Create LIFO queue of infinite size that reads camera input
         input_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads controller input
 
-        thread_1 = threading.Thread(target = image_acquisition.retrieve_current_image, args = (camera_feed, ))
-        thread_1.name = "ImageAcquisition_thread"
+        process_1 = multiprocessing.Process(target = image_acquisition.retrieve_current_image, args = (camera_feed, ))
+        process_1.name = "ImageAcquisition_process"
         thread_2 = threading.Thread(target = input_method.get_direction_from_keyboard, args = (input_feed, ))
         thread_2.name = "KeyboardListener_thread"
 
-        thread_1.start()
+        process_1.start()
         thread_2.start()
 
         pygame.init()
 
         logger.success("Ready to receive inputs.\n")
         while True:
-            current_frame = camera_feed.get()
+            current_frame = None
+            if not camera_feed.empty():
+                current_frame = camera_feed.get()
+                if current_frame is None: # Sentinel value received, exit pogram loop
+                    break
 
             # Possible code for image processing
+            # if current_frame is not None:
                 # current_pos = get_needle_pos(current_frame)
                 # logger.info("Needle is currently at {}".format(current_pos))
+            # if current_frame is None:
+            #     logger.error("No image received so can't get needle position")
             
-            # If camera feed is shown (nofeed == false)
-            if not image_acquisition.no_cam_feed:
-                cv2.imshow("Top Camera Feed", current_frame)
-                if cv2.waitKey(1) == 27: # Escape Key exits loop
-                    cv2.destroyAllWindows()
-                    break
 
             events = pygame.event.get()
             input_method.get_direction_from_pygame_events(input_feed, events)
         
             direction = None
+            
             if not input_feed.empty():
                 direction = input_feed.get()
+                if direction is None: # Sentinel value was put in Queue
+                    break
 
             # Check if faulty input and try again
-            if direction is None or input_feed.qsize() == 0:
+            if direction is None:
                 continue
             if direction.direction == -1:
                 continue
 
             # Move the needle:
-            # logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
             if direction.direction == 100:
                 logger.success("Init called: moving to zero then to 100 steps")
                 self.initial_position()
@@ -152,9 +155,9 @@ class Needle:
         image_acquisition.is_running = False
         input_method.is_running = False
 
-        thread_1.join()
-        thread_2.join()        
-
+        process_1.terminate()
+        process_1.join()
+        thread_2.join()
 
     def move_freely(self):
         """
