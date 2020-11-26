@@ -38,13 +38,27 @@ def blur(in_image, size_blur=3):
     return cv2.filter2D(in_image, -1, kernel)
 
 
-def orientation(line) -> (float, float):
+def orientation(line, mid_height) -> (float, float):
     x1 = line[0]
-    y1 = line[1]
+    y1 = line[1] - mid_height
     x2 = line[2]
-    y2 = line[3]
-    abs_r = sqrt((x2-x1)^2 + (y2-y1)^2)
+    y2 = line[3] - mid_height
+    abs_r = sqrt((x2-x1)**2 + (y2-y1)**2)
     return (x2-x1)/abs_r, (y2-y1)/abs_r
+
+
+def line_numbering(in_image, lines_array):
+    lines = lines_array
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale = 0.5
+    blue = (255, 255, 0)
+    thickness = 1
+    for i in range(len(lines)):
+        xi = lines[i, 2]
+        yi = lines[i, 3]
+        origin = (xi, yi)
+        in_image = cv2.putText(in_image, str(i), origin, fontFace=font, fontScale=fontScale, color=blue, thickness=thickness, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
+    return in_image
 
 
 def position_feedback(path, configpath, show='no') -> (tuple, tuple):
@@ -60,28 +74,25 @@ def position_feedback(path, configpath, show='no') -> (tuple, tuple):
     in_image = cv2.imread(path)
     in_image = cv2.cvtColor(in_image, cv2.COLOR_BGR2GRAY)
     in_image = reduce_size(in_image, 40)
+    small_color = cv2.cvtColor(in_image, cv2.COLOR_GRAY2BGR)
     print(in_image)
-    print(type(in_image))
+    print(" type of a in_image = ", type(in_image))
+    print(" type of a single cell = ", type(in_image[0, 0]))
     #print(str(in_image.shape[0]) + ' and type is ' + str(type(in_image[0])))
 
     # Read config.ini file
     config_object = ConfigParser()
     config_object.read(configpath)
     imagepos = config_object["IMAGEPOS"]
-    lower_threshold = imagepos["lower_threshold"]
-    upper_threshold = imagepos["upper_threshold"]
-    theta_resolution = imagepos["theta_resolution"]
-    min_votes = imagepos["min_votes"]
-    minll = imagepos["minll"]
-    maxlg = imagepos["maxlg"]
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    fontscale = 0.5
-    purple = (200, 100, 200)
-    blue = (255, 0, 0)
-    thickness = 1
+    lower_threshold = int(imagepos["lower_threshold"])
+    upper_threshold = int(imagepos["upper_threshold"])
+    theta_resolution = int(imagepos["theta_resolution"])
+    min_votes = int(imagepos["min_votes"])
+    minll = int(imagepos["minll"])
+    maxlg = int(imagepos["maxlg"])
 
     # creating edge mask then performing line detection
-    edge_mask = cv2.Canny(in_image, lower_threshold, upper_threshold)
+    edge_mask = cv2.Canny(image=in_image, threshold1=lower_threshold, threshold2=upper_threshold)
     lines = cv2.HoughLinesP(edge_mask, 1, np.pi / theta_resolution, min_votes, minLineLength=minll, maxLineGap=maxlg)
     # sorting lines by smallest x1 coord
     sorting_ind = np.argsort(lines[:, 0, 0])
@@ -89,29 +100,26 @@ def position_feedback(path, configpath, show='no') -> (tuple, tuple):
     for i in range(len(lines[:, 0, 0])):
         row_to_append = np.array(lines[sorting_ind[i], 0, :], dtype='int16')
         sorted_lines[i, :] = row_to_append
+    print("image_proc2: sorted_lines = \n", sorted_lines)
 
-    # showing lines in image if requested
+    # showing lines in gray of original image if requested
     if show == 'yes':
+        purple = (200, 100, 200)
         # putting lines in image
         for line in lines:
             x1, y1, x2, y2 = line[0]
-            cv2.line(in_image, (x1, y1), (x2, y2), purple, 2)
+            cv2.line(small_color, (x1, y1), (x2, y2), purple, 2)
         # putting numbers in image
-        for i in range(len(lines)):
-            xi = lines[i, 0]
-            yi = lines[i, 1]
-            origin = (xi, yi)
-
-            in_image = cv2.putText(in_image, str(i), origin, fontFace=font, fontScale=fontscale, color=blue,
-                                   thickness=thickness, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
-
-        cv2.imshow('Numbered Lines', in_image)
+        num_image = line_numbering(small_color, sorted_lines)
+        cv2.imshow('Numbered Lines', num_image)
         print("image_proc: Press enter to stop showing image(s)")
         if cv2.waitKey(0) == 13:
             cv2.destroyAllWindows()
-    print("Do I ever go this far????")
 
-    # position calculation part
-    tip_dir = orientation(sorted_lines[-1, :])
+    # position calculation returning (x2, y2) of last line, (x_orientation, y_orientation)
+    # y orientation with respect to the mid horizontal line
+    y_mid = int(in_image.shape[0]/2)
+    tip_dir = orientation(sorted_lines[-1, :], y_mid)
+
     tip_pos = (sorted_lines[-1, 2], sorted_lines[-1, 3])
     return tip_pos, tip_dir
