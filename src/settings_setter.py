@@ -17,12 +17,12 @@ config_object["NEEDLE"] = {
 }
 
 config_object["IMAGEPOS"] = {
-    "lower_threshold": "150",
-    "upper_threshold": "220",
-    "min_votes": "200",
-    "maxLG": "20",
-    "minLL": "25",
-    "theta_resolution": "180"
+    "lower_threshold": "100",
+    "upper_threshold": "200",
+    "theta_resolution": "180",
+    "min_votes": "80",
+    "minLL": "20",
+    "maxLG": "5"
 }
 
 #Write the above sections to config.ini file
@@ -31,6 +31,6 @@ with open('config.ini', 'w') as conf:
 
 config_object = ConfigParser()
 config_object.read("config.ini")
-print(config_object.read("config.ini"))
-imagepos = config_object["FESTO"]
-print(imagepos["startpos"])
+print("CHECK: path to config", config_object.read("config.ini"))
+imagepos = config_object["IMAGEPOS"]
+print("CHECK: lower_threshold value is: ", imagepos["lower_threshold"])

@@ -39,7 +39,7 @@ def line_detect(in_image, lines_on_image, lower_threshold, upper_threshold, thet
     if lpf == 'yes':
         kernel = np.ones((3,3),np.float32)/9
         in_image = cv2.filter2D(in_image,-1,kernel)
-
+    print(in_image)
     edges = cv2.Canny(in_image, lower_threshold, upper_threshold)
     if show == 'yes':
         cv2.imshow("edge mask", edges)
@@ -54,14 +54,14 @@ def line_detect(in_image, lines_on_image, lower_threshold, upper_threshold, thet
 
 def line_numbering(in_image, lines_array):
     lines = lines_array
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale = 0.5
+    color = (255, 0, 0)
+    thickness = 1
     for i in range(len(lines)):
         xi = lines[i, 2]
         yi = lines[i, 3]
         origin = (xi, yi)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale = 0.5
-        color = (255, 0, 0)
-        thickness = 1
         in_image = cv2.putText(in_image, str(i), origin, fontFace=font, fontScale=fontScale, color=color, thickness=thickness, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
     return in_image
 
@@ -69,11 +69,13 @@ org_image = cv2.imread(r'C:\Users\flore\Documents\Uni\brachyosaurus\src\image_po
 gray = cv2.cvtColor(org_image, cv2.COLOR_BGR2GRAY)
 gray_small = reduce_size(gray, 40)
 small_color = cv2.cvtColor(gray_small, cv2.COLOR_GRAY2BGR)
+print(gray_small)
+print(" and type is ", type(gray_small))
+print(" type of a single cell = ", type(gray_small[0, 0]))
 
 # detecting and placing lines in image
-lines = line_detect(gray_small, small_color, 150, 200, 180, 50, 20, 5, 'yes', 'yes')
+lines = line_detect(gray_small, small_color, 150, 220, 180, 50, 30, 5, 'yes', 'yes')
 # lines is in order [x1 y1 x2 y2]
-print(lines.tolist())
 
 # sorting lines by smallest x1 coord
 sorting_ind = np.argsort(lines[:, 0, 0])
@@ -82,7 +84,7 @@ for i in range(len(lines[:, 0, 0])):
     row_to_append = np.array(lines[sorting_ind[i], 0, :], dtype='int16')
     sorted_lines[i, :] = row_to_append
 
-print(sorted_lines)
+#print("image_proc.py: sorted lines = \n",sorted_lines)
 # numbering lines in image
 num_image = line_numbering(small_color, sorted_lines)
 

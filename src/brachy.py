@@ -124,13 +124,9 @@ def image_pos(args: argparse.Namespace) -> None:
     """"
     Handler for the camera and image processing
     """
-    config_object = ConfigParser()
-    config_object.read(args.configpath)
-    imagepos = config_object["IMAGEPOS"]
-    print( imagepos["lower_threshold"])
-    tuple1, tuple2 = position_feedback(args.imagepath, args.configpath, show='yes')
-    print("tuple1 is: ", tuple1)
-    print("tuple2 is: ", tuple2)
+    tip_position, tip_ori = position_feedback(args.imagepath, args.configpath, show='yes')
+    print("tuple1 is: ", tip_position)
+    print("tuple2 is: ", tip_ori)
 
 
 if __name__ == '__main__':
