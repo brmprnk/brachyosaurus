@@ -76,6 +76,8 @@ PARSER_IMAGEPOS.add_argument("--configpath", type=str, default="config.ini", act
                            help="The path to the config file")
 PARSER_IMAGEPOS.add_argument("--imagepath", type=str, default="image_pos/photos/bending2.jpg", action="store",
                            help="The path to the config file")
+PARSER_IMAGEPOS.add_argument("--filtering", type=str, default="no", action="store",
+                           help="Use a 3x3 low-pass filter before edge processing")
 
 
 def main() -> None:
@@ -123,10 +125,16 @@ def linear_stage(args: argparse.Namespace) -> None:
 def image_pos(args: argparse.Namespace) -> None:
     """"
     Handler for the camera and image processing
+    useful for checking position feedback module
     """
-    tip_position, tip_ori = position_feedback(args.imagepath, args.configpath, show='yes')
-    print("tuple1 is: ", tip_position)
-    print("tuple2 is: ", tip_ori)
+    tip_position, tip_ori = position_feedback(args.imagepath, args.configpath, filtering=args.filtering, show='yes')
+    print("tip_position is: ", tip_position)
+    print("tip orientation is: ", tip_ori)
+
+    # suggested route manager and movement recommendation code
+    # waypoints2D = some function
+    # route_on_image(args.imagepath, waypoints2D)
+    # route_check(args.imagepath, tip_pos, tip_ori)  gives a recommendation to move
 
 
 if __name__ == '__main__':

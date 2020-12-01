@@ -30,7 +30,7 @@ def reduce_size(in_image, scale_percent=50):
     return cv2.resize(in_image, dsize, interpolation=cv2.INTER_CUBIC)
 
 
-def blur(in_image, size_blur=3):
+def lpf(in_image, size_blur=3):
     """Low pass filtering the image"""
     if size_blur < 3:
         size_blur = 3
@@ -51,17 +51,17 @@ def line_numbering(in_image, lines_array):
     lines = lines_array
     font = cv2.FONT_HERSHEY_SIMPLEX
     fontScale = 0.5
-    blue = (255, 255, 0)
+    lightblue = (255, 255, 0)
     thickness = 1
     for i in range(len(lines)):
         xi = lines[i, 2]
         yi = lines[i, 3]
         origin = (xi, yi)
-        in_image = cv2.putText(in_image, str(i), origin, fontFace=font, fontScale=fontScale, color=blue, thickness=thickness, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
+        in_image = cv2.putText(in_image, str(i), origin, fontFace=font, fontScale=fontScale, color=lightblue, thickness=thickness, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
     return in_image
 
 
-def position_feedback(path, configpath, show='no') -> (tuple, tuple):
+def position_feedback(path, configpath, filtering='no', show='no') -> (tuple, tuple):
     """
     Returns x (int), y (int) position and orientation (float) of needle object
         in_image: the image from which the position is read
@@ -91,6 +91,10 @@ def position_feedback(path, configpath, show='no') -> (tuple, tuple):
     minll = int(imagepos["minll"])
     maxlg = int(imagepos["maxlg"])
 
+    # lpf filtering if selected
+    if filtering == 'yes':
+        in_image = lpf(in_image)
+
     # creating edge mask then performing line detection
     edge_mask = cv2.Canny(image=in_image, threshold1=lower_threshold, threshold2=upper_threshold)
     lines = cv2.HoughLinesP(edge_mask, 1, np.pi / theta_resolution, min_votes, minLineLength=minll, maxLineGap=maxlg)
@@ -102,24 +106,30 @@ def position_feedback(path, configpath, show='no') -> (tuple, tuple):
         sorted_lines[i, :] = row_to_append
     print("image_proc2: sorted_lines = \n", sorted_lines)
 
-    # showing lines in gray of original image if requested
-    if show == 'yes':
-        purple = (200, 100, 200)
-        # putting lines in image
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            cv2.line(small_color, (x1, y1), (x2, y2), purple, 2)
-        # putting numbers in image
-        num_image = line_numbering(small_color, sorted_lines)
-        cv2.imshow('Numbered Lines', num_image)
-        print("image_proc: Press enter to stop showing image(s)")
-        if cv2.waitKey(0) == 13:
-            cv2.destroyAllWindows()
-
     # position calculation returning (x2, y2) of last line, (x_orientation, y_orientation)
     # y orientation with respect to the mid horizontal line
     y_mid = int(in_image.shape[0]/2)
     tip_dir = orientation(sorted_lines[-1, :], y_mid)
 
     tip_pos = (sorted_lines[-1, 2], sorted_lines[-1, 3])
+
+    # showing lines in gray of original image if requested
+    if show == 'yes':
+        purple = (200, 100, 200)
+        yellow = (0, 255, 255)
+        # putting lines in image
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            cv2.line(small_color, (x1, y1), (x2, y2), purple, 2)
+        # putting numbers and direction arrow in image
+        num_image = line_numbering(small_color, sorted_lines)
+        endpoint = (tip_pos[0]+int(40*tip_dir[0]), tip_pos[1]+int(40*tip_dir[1]))
+        print("image_proc: endpoint arrow = ", endpoint)
+        num_arrow_image = cv2.arrowedLine(num_image, tip_pos, endpoint,
+                                          yellow, 2)
+        cv2.imshow('Numbered Lines', num_arrow_image)
+        print("image_proc: Press enter to stop showing image(s)")
+        if cv2.waitKey(0) == 13:
+            cv2.destroyAllWindows()
+
     return tip_pos, tip_dir
