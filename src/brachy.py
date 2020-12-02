@@ -15,7 +15,6 @@ import argparse
 import os
 import sys
 import signal
-from configparser import ConfigParser
 
 # sys.path.append is used to import local modules from the project.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -23,8 +22,8 @@ from src.util import input_processing
 from src.util import logger
 # from src.util.saving import Saving
 import src.needle as needle
-import reset_arduino
-from src.image_pos.image_proc2 import read, position_feedback
+from src.reset_arduino import func as reset_arduino
+from src.image_proc2 import position_from_image
 
 # pylint: disable=unused-argument
 # Disable unused argument because the SIGINT event handler always takes two parameters, but for the
@@ -107,7 +106,7 @@ def brachy_therapy(args: argparse.Namespace) -> None:
     Handler for main purpose of program
     """
     if args.init:
-        reset_arduino.func(args.comport, args.startsteps)
+        reset_arduino(args.comport, args.startsteps)
     else:
         # Create Needle object
         board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
@@ -127,11 +126,11 @@ def image_pos(args: argparse.Namespace) -> None:
     Handler for the camera and image processing
     useful for checking position feedback module
     """
-    tip_position, tip_ori = position_feedback(args.imagepath, args.configpath, filtering=args.filtering, show='yes')
-    print("tip_position is: ", tip_position)
-    print("tip orientation is: ", tip_ori)
+    tip_position, tip_ori = position_from_image(args.imagepath, args.configpath, filtering=args.filtering, show='yes')
+    print("brachy.py: tip_position is: ", tip_position)
+    print("brachy.py: tip orientation is: ", tip_ori)
 
-    # suggested route manager and movement recommendation code
+    # TODO suggested route manager and movement recommendation code:
     # waypoints2D = some function
     # route_on_image(args.imagepath, waypoints2D)
     # route_check(args.imagepath, tip_pos, tip_ori)  gives a recommendation to move
