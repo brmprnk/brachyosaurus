@@ -15,6 +15,7 @@ import argparse
 import os
 import sys
 import signal
+import threading
 
 # sys.path.append is used to import local modules from the project.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -22,7 +23,8 @@ from src.util import input_processing
 from src.util import logger
 # from src.util.saving import Saving
 import src.needle as needle
-import reset_arduino
+# import src.image_position
+import src.reset_arduino as reset_arduino
 
 # pylint: disable=unused-argument
 # Disable unused argument because the SIGINT event handler always takes two parameters, but for the
@@ -39,6 +41,8 @@ def async_event_handler(sig: int, frame: object) -> None:
     :return: None
     """
     logger.error("\nInterrupted program execution...")
+    for thread in threading.enumerate():
+        print("Thread running on shutdown: ", thread.name)
     sys.exit(sig)
 
 
@@ -50,6 +54,25 @@ PARSER = argparse.ArgumentParser(prog="brachy.py", description="Program to contr
 SUBPARSERS = PARSER.add_subparsers(dest="subparse")
 PARSER_FESTO = SUBPARSERS.add_parser("FESTO", help="Control the FESTO linear stage")
 PARSER_NEEDLE = SUBPARSERS.add_parser("NEEDLE", help="Control the movement of the needle")
+PARSER_POSITION = SUBPARSERS.add_parser("POSITION", help="Gain feedback on the position of the needle")
+
+# Arguments for main module (Needle and Camera's)
+PARSER.add_argument("-init", action="store_true", help="Initializes Crouzet Stepper Motor positions.")
+PARSER.add_argument("-manual", action="store_true", default=True,
+                    help="Determines control mode. Automatic is the default.")
+PARSER.add_argument("--comport", type=str, default="COM5", action="store",
+                    help="The comport on which the Arduino is connected")
+PARSER.add_argument("--startsteps", type=str, default="100", action="store",
+                    help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
+PARSER.add_argument("--sensitivity", type=str, default="1", action="store",
+                    help="The sensitivity of the needle controls (between 0 and 1) ")
+PARSER.add_argument("--fps", action="store", type=int, default=1,
+                    help="The number of times (per second) the module should check for its position using camera's")
+PARSER.add_argument("--camtop", action="store", type=str, default="https://192.168.43.1:8080/video",
+                    help="The URL or path to the (live) video of the camera positioned above the needle")
+PARSER.add_argument("--camfront", action="store", type=str, default="",
+                    help="The URL or path to the (live) video of the camera positioned in front of the needle")
+PARSER.add_argument("-nofeed", action="store_true", help="Should the camera feed be displayed on screen")
 
 # Parser for the FESTO command with all the options
 PARSER_FESTO.add_argument("--targetpos", type=int, default=0, action="store",
@@ -83,13 +106,34 @@ def main() -> None:
 
     if subparser == "FESTO":
         linear_stage(parser)
-    if subparser == "NEEDLE":
-        brachy_therapy(parser)
+    elif subparser == "NEEDLE":
+        needle_movement(parser)
     else:
-        PARSER.print_help()
-
+        if len(sys.argv) <= 1: # No optional arguments given --> print help
+            PARSER.print_help()
+        else:
+            brachy_therapy(parser)
 
 def brachy_therapy(args: argparse.Namespace) -> None:
+    """
+    Handler for positional feedback using image acquisition & processing
+    """
+    if args.init:
+        reset_arduino.func(args.comport, args.startsteps)
+    else:
+        logger.success("Starting Brachy Therapy.\n")
+
+        # Create Needle object
+        board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
+        # Call its movement function
+        if args.manual:
+            logger.info("Input type is MANUAL.")
+            board_controller.manual_brachy_therapy(args)
+        else:
+            logger.info("Automated Control. Computer will output its predicted trajectory.")
+            board_controller.automated_brachy_therapy(args)
+
+def needle_movement(args: argparse.Namespace) -> None:
     """
     Handler for main purpose of program
     """
@@ -100,6 +144,7 @@ def brachy_therapy(args: argparse.Namespace) -> None:
         board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
         # Call its movement function
         board_controller.move_freely()
+
 
 
 def linear_stage(args: argparse.Namespace) -> None:

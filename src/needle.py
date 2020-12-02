@@ -2,11 +2,18 @@
 Manager file for the steerable needle.
 """
 import time
+import threading
+import multiprocessing
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+from queue import LifoQueue
 import pyfirmata
+import pygame
+
 from src.controls import stepper_motor
-# from src.controls import controller
 from src.controls.controller import Controller
 from src.util import logger
+from src.image_acquisition import ImageAcquisition
 
 
 class Needle:
@@ -79,6 +86,86 @@ class Needle:
         return_value = self.motors.pop(index)
         return return_value
 
+    def automated_brachy_therapy(self, args) -> None:
+        """
+        Handler for AUTOMATED Brachy Therapy.
+        Can handle two camera's, and also allows for manual inputs to overwrite aoutomated commands.
+        """
+        # Enter code here
+
+    def manual_brachy_therapy(self, args) -> None:
+        """
+        Handler for MANUAL Brachy Therapy, with possibility of needle tracking by two cameras.
+        """
+        # Create instances of controller and image acquisition
+        input_method = Controller()
+        image_acquisition = ImageAcquisition(args.fps, args.camtop, args.camfront, args.nofeed)
+
+        # Queues allow for communication between threads. LIFO means the most recent image/input will be used
+        camera_feed = multiprocessing.Queue(maxsize=0) # Create LIFO queue of infinite size that reads camera input
+        input_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads controller input
+
+        process_1 = multiprocessing.Process(target = image_acquisition.retrieve_current_image, args = (camera_feed, ))
+        process_1.name = "ImageAcquisition_process"
+        thread_2 = threading.Thread(target = input_method.get_direction_from_keyboard, args = (input_feed, ))
+        thread_2.name = "KeyboardListener_thread"
+
+        process_1.start()
+        thread_2.start()
+
+        pygame.init()
+
+        logger.success("Ready to receive inputs.\n")
+        while True:
+            current_frame = None
+            if not camera_feed.empty():
+                current_frame = camera_feed.get()
+                if current_frame is None: # Sentinel value received, exit pogram loop
+                    break
+
+            # Possible code for image processing
+            # if current_frame is not None:
+                # current_pos = get_needle_pos(current_frame)
+                # logger.info("Needle is currently at {}".format(current_pos))
+            # if current_frame is None:
+            #     logger.error("No image received so can't get needle position")
+            
+
+            events = pygame.event.get()
+            input_method.get_direction_from_pygame_events(input_feed, events)
+        
+            direction = None
+            
+            if not input_feed.empty():
+                direction = input_feed.get()
+                if direction is None: # Sentinel value was put in Queue
+                    break
+
+            # Check if faulty input and try again
+            if direction is None:
+                continue
+            if direction.direction == -1:
+                continue
+
+            # Move the needle:
+            if direction.direction == 100:
+                logger.success("Init called: moving to zero then to 100 steps")
+                self.initial_position()
+            else:
+                logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
+                self.move_to_dir_sync(direction)
+
+
+        # Neatly exiting loop
+        print("Finished Program Execution", threading.active_count())
+        pygame.quit()
+        image_acquisition.is_running = False
+        input_method.is_running = False
+
+        process_1.terminate()
+        process_1.join()
+        thread_2.join()
+
     def move_freely(self):
         """
         Handler for needle movement
@@ -91,7 +178,7 @@ class Needle:
             # Check if faulty input and try again
             while dirOutput.direction == -1:
                 time.sleep(0.5) # Sleep to make sure button is unpressed
-                direction = input_method.get_direction()
+                dirOutput = input_method.get_direction()
 
             # Move the needle:
             if dirOutput.direction == 100:

@@ -2,12 +2,13 @@ from labjack import ljm
 import time
 import sys
 
-######################################
-## Function FESTO(endloc, startloc,speed)
-## Drives the linear stage to a position 'endloc' with speed 'speed' after command 'startloc' did its thing
-## startloc arguments: 	- position float in mm like '0' goes to minimum position or '50' goes to maximum position
-##						- integer '-1' keeps the stage in its current place
-######################################
+"""
+Function FESTO(endloc, startloc,speed)
+Drives the linear stage to a position 'endloc' with speed 'speed' after command 'startloc' did its thing
+startloc arguments: 	- position float in mm like '0' goes to minimum position or '50' goes to maximum position
+						- integer '-1' keeps the stage in its current place 
+"""
+
 
 # Open first USB connected found LabJack
 handle = ljm.openS("ANY", "USB", "ANY")

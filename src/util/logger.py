@@ -43,7 +43,7 @@ def success(message: str) -> None:
     if "win32" in sys.platform.lower():
         print("SUCCESS: " + message)
     else:
-        print("\033[1;32mERROR: %s\033[0;0m" % message)
+        print("\033[1;32mSUCCESS: %s\033[0;0m" % message)
 
     write_to_log("SUCCESS: " + message)
 
