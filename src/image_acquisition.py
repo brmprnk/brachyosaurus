@@ -7,14 +7,19 @@ This file finds the X,Y coordinates of the needle using the tasks:
 import cv2
 from src.util import logger
 
+#pylint: disable=too-few-public-methods
 class ImageAcquisition:
     """
     Class that encapsulates the functionality of retrieving images from a (live) video feed.
+    The video feed is shown to the user using the OpenCV imshow() functionality.
+
+    The user defines the number of times per second the video footage is used to calculate position,
+    and these frames are sent back to the main program loop using a Queue.
     """
     def __init__(self, images_per_second: int, top_camera: str, front_camera: str, no_cam_feed: bool) -> None:
         if top_camera == "" and front_camera == "":
             logger.error("No URL or Path to camera's were given --> Not able to provide visual feedback")
-        
+
         self.top_vid_link = "http://192.168.43.1:8080/video"
         # TODO: self.front_vid_link = front_camera
 
@@ -22,7 +27,7 @@ class ImageAcquisition:
         self.no_cam_feed = no_cam_feed
 
         self.is_running = True # Bool to be modified from main loop, that ends loop
-    
+
     def retrieve_current_image(self, video_feed):
         """
         Produces an image feed. This video feed is output to the screen using imshow().
@@ -47,11 +52,12 @@ class ImageAcquisition:
                         cv2.destroyAllWindows()
                         video_feed.put(None) # Sentinel Value to end main program loop
                         break
-                if frame_nr % produce_image_frame == 0: # Only show if the frame corresponds to desired images_per_second
+                if frame_nr % produce_image_frame == 0:
+                    # Only show if the frame corresponds to desired images_per_second
                     video_feed.put(frame)
             else:
                 logger.error("Not able to retrieve image from VideoCapture Object.")
-                
+
                 top_vidcap.release()
                 cv2.destroyAllWindows()
                 video_feed.put(None) # Sentinel Value to end main program loop

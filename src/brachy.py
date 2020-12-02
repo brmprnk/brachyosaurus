@@ -24,7 +24,7 @@ from src.util import logger
 # from src.util.saving import Saving
 import src.needle as needle
 # import src.image_position
-import reset_arduino
+import src.reset_arduino as reset_arduino
 
 # pylint: disable=unused-argument
 # Disable unused argument because the SIGINT event handler always takes two parameters, but for the
@@ -41,7 +41,7 @@ def async_event_handler(sig: int, frame: object) -> None:
     :return: None
     """
     logger.error("\nInterrupted program execution...")
-    for thread in threading.enumerate(): 
+    for thread in threading.enumerate():
         print("Thread running on shutdown: ", thread.name)
     sys.exit(sig)
 
@@ -129,6 +129,9 @@ def brachy_therapy(args: argparse.Namespace) -> None:
         if args.manual:
             logger.info("Input type is MANUAL.")
             board_controller.manual_brachy_therapy(args)
+        else:
+            logger.info("Automated Control. Computer will output its predicted trajectory.")
+            board_controller.automated_brachy_therapy(args)
 
 def needle_movement(args: argparse.Namespace) -> None:
     """
@@ -138,7 +141,7 @@ def needle_movement(args: argparse.Namespace) -> None:
         reset_arduino.func(args.comport, args.startsteps)
     else:
         # Create Needle object
-        board_controller = needle.Needle(args.comport, args.startsteps)
+        board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
         # Call its movement function
         board_controller.move_freely()
 

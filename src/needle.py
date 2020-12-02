@@ -86,6 +86,13 @@ class Needle:
         return_value = self.motors.pop(index)
         return return_value
 
+    def automated_brachy_therapy(self, args) -> None:
+        """
+        Handler for AUTOMATED Brachy Therapy.
+        Can handle two camera's, and also allows for manual inputs to overwrite aoutomated commands.
+        """
+        # Enter code here
+
     def manual_brachy_therapy(self, args) -> None:
         """
         Handler for MANUAL Brachy Therapy, with possibility of needle tracking by two cameras.

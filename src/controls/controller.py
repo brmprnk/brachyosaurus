@@ -6,13 +6,13 @@ from enum import Enum
 import sys
 import math
 import os
+import time
+from queue import LifoQueue
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import keyboard
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import src.util.logger as logger
-from queue import LifoQueue
-import time
 
 
 class Direction(Enum):
@@ -29,7 +29,12 @@ class Direction(Enum):
     left = 6
     upleft = 7
 
+# pylint: disable=too-few-public-methods
 class Output:
+    """
+    Class that encapsulates the result of a Controller press.
+    A user input should have a direction, but it needs to incorporate how far it should move.
+    """
     def __init__(self, direction, stepsout):
         self.direction = direction
         self.stepsx = stepsout[0]
@@ -37,7 +42,7 @@ class Output:
 
 class Controller:
     """
-    Class that encapsulates receiving inputs and returning directions
+    Class that encapsulates receiving inputs and returning directions.
     """
     def __init__(self) -> None:
         self.deadzone = 0.2
@@ -45,7 +50,7 @@ class Controller:
         self.joystick = None
         self.is_running = True
         self.get_input_method()
-    
+
     def get_input_method(self) -> None:
         """
         Setup controls. Support for controllers and keyboard.
@@ -55,10 +60,13 @@ class Controller:
             self.joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
             logger.success("Controller connected : " + self.joystick.get_name())
-            logger.info("While holding the left stick pointed towards a direction, press the A button to confirm your choice.")
+            logger.info(
+                "While holding the left stick pointed towards a direction, press the A button to confirm your choice.")
         else:
             logger.info("A Keyboard is connected.")
-            logger.info("While pressing the arrowkeys to a desired direction, press the Return (Enter) Key to confirm your choice.")
+            logger.info(
+                "While pressing the arrowkeys to a desired direction" +
+                "press the Return (Enter) Key to confirm your choice.")
 
     def get_direction_from_pygame_events(self, input_feed, events):
         """
@@ -204,6 +212,9 @@ class Controller:
             if y_coord > 0:
                 return Output(Direction.upleft.value, stepsout)
 
-
-    def dir_to_text(self, direction) -> str:
+    @classmethod
+    def dir_to_text(cls, direction) -> str:
+        """
+        Converts a direction to a String representation of that direction.
+        """
         return Direction(direction)
