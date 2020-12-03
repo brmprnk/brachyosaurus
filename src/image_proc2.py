@@ -71,16 +71,17 @@ def line_numbering(in_image, lines_array):
     return in_image
 
 
-def position_from_image(imagepath: str, configpath: str, filtering='no', show='no') -> (tuple, tuple):
+def position_from_image(in_image, configpath: str, filtering='no', show='no') -> (tuple, tuple):
     """
     Version 1: provides position feedback by just returning x2 y2 of last line and its orientation (tip_pos, tip_dir)
-        - imagepath: the path to the image from which the position is read
+        - in_image: the path to the image or the image itself from which the position is read
         - configpath: the path to the config file with all image processing settings
         - filtering (optional): 'yes' if a 3x3 low-pass filter improves line detection see 'lpf' function above
         - show (optional): 'yes' if all numbered lines and orientation of tip need to be shown in the original image
     """
     # Read image, convert to grayscale and reduce resolution for calculation speed
-    in_image = cv2.imread(imagepath)
+    if type(in_image) == str:
+        in_image = cv2.imread(in_image)
     in_image = cv2.cvtColor(in_image, cv2.COLOR_BGR2GRAY)
     in_image = reduce_size(in_image, 40)
 

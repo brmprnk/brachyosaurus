@@ -14,6 +14,7 @@ from src.controls import stepper_motor
 from src.controls.controller import Controller
 from src.util import logger
 from src.image_acquisition import ImageAcquisition
+from src.image_proc2 import position_from_image
 
 
 class Needle:
@@ -123,12 +124,12 @@ class Needle:
                 if current_frame is None: # Sentinel value received, exit pogram loop
                     break
 
-            # Possible code for image processing
-            # if current_frame is not None:
-                # current_pos = get_needle_pos(current_frame)
-                # logger.info("Needle is currently at {}".format(current_pos))
-            # if current_frame is None:
-            #     logger.error("No image received so can't get needle position")
+            # TODO: check and finish use of image proc in manual_brachy function
+            if current_frame is not None:
+                tip_position, tip_ori = position_from_image(current_frame, "config.ini", filtering='yes')
+                logger.info("Needletip is currently at {}".format(tip_position))
+            if current_frame is None:
+                logger.error("No image received so can't get needle position")
             
 
             events = pygame.event.get()
@@ -149,7 +150,7 @@ class Needle:
 
             # Move the needle:
             if direction.direction == 100:
-                logger.success("Init called: moving to zero then to 100 steps")
+                logger.success("Init called: moving to zero then to 200 steps")
                 self.initial_position()
             else:
                 logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
@@ -182,7 +183,7 @@ class Needle:
 
             # Move the needle:
             if dirOutput.direction == 100:
-                logger.success("Init called: moving to zero then to 100 steps")
+                logger.success("Init called: moving to zero then to 200 steps")
                 self.initial_position()
             else:
                 logger.success("Moving to : {}".format(input_method.dir_to_text(dirOutput.direction)))
@@ -210,7 +211,7 @@ class Needle:
 
     def initial_position(self):
         """
-        Stuur de motoren terug naar 100
+        Stuur de motoren terug naar 200
         """
         for motor_i in range(len(self.motors)):
             position = self.motors[motor_i].get_count()
