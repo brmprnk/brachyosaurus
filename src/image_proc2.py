@@ -150,7 +150,7 @@ def position_from_image(in_image, configpath: str, flip='no', filtering='no', sh
         num_arrow_image = cv2.arrowedLine(num_image, tip_pos, endpoint, yellow, 2)
         cv2.imshow('Numbered Lines', num_arrow_image)
         print("image_proc->show part: Press enter to stop showing image(s)")
-        if cv2.waitKey(500) == 13:
+        if cv2.waitKey(1) == 13:
             cv2.destroyAllWindows()
 
     return tip_pos, tip_dir

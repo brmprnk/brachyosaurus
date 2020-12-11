@@ -7,6 +7,7 @@ import multiprocessing
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from queue import LifoQueue
+import argparse
 import pyfirmata
 import pygame
 
@@ -14,7 +15,6 @@ from src.controls import stepper_motor
 from src.controls.controller import Controller
 from src.util import logger
 from src.image_acquisition import ImageAcquisition
-from src.image_proc2 import position_from_image
 
 
 class Needle:
@@ -94,81 +94,88 @@ class Needle:
         """
         # Enter code here
 
-    def manual_brachy_therapy(self, args) -> None:
+    def manual_brachy_therapy(self, args: argparse.Namespace) -> None:
+        """Main Program Loop for MANUAL Brachy Therapy, with possibility of needle tracking by two cameras.
+
+        Parameters
+        ----------
+        args : argparse.Namespace
+
+        Returns
+        -------
+        None
         """
-        Handler for MANUAL Brachy Therapy, with possibility of needle tracking by two cameras.
-        """
-        # Create instances of controller and image acquisition
+        # Create Class instances of controller and image acquisition
         input_method = Controller()
         image_acquisition = ImageAcquisition(args.fps, args.camtop, args.camfront, args.nofeed)
 
         # Queues allow for communication between threads. LIFO means the most recent image/input will be used
-        camera_feed = multiprocessing.Queue(maxsize=0) # Create LIFO queue of infinite size that reads camera input
         input_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads controller input
+        needle_pos_feed = multiprocessing.Queue(maxsize=0) # Create Queue for communication of needle tip pos/ori
 
-        process_1 = multiprocessing.Process(target = image_acquisition.retrieve_current_image, args = (camera_feed, ))
-        process_1.name = "ImageAcquisition_process"
-        thread_2 = threading.Thread(target = input_method.get_direction_from_keyboard, args = (input_feed, ))
-        thread_2.name = "KeyboardListener_thread"
+        # Create and start Process for Image Acq/Proc and Thread for Input Listening
+        process_1 = multiprocessing.Process(target=image_acquisition.retrieve_current_image, args=(needle_pos_feed, ))
+        process_1.name = "ImageAcquiProc_process"
+        thread_1 = threading.Thread(target=input_method.get_direction_from_keyboard, args=(input_feed, ))
+        thread_1.name = "KeyboardListener_thread"
 
         process_1.start()
-        thread_2.start()
+        thread_1.start()
 
+        # Start pygame to allow controller inputs
         pygame.init()
 
         logger.success("Ready to receive inputs.\n")
         while True:
-            current_frame = None
-            if not camera_feed.empty():
-                current_frame = camera_feed.get()
-                if current_frame is None: # Sentinel value received, exit pogram loop
+            # Check for needle coordinates in the Multiprocessing Queue
+            if not needle_pos_feed.empty():
+
+                tip_position, tip_ori = needle_pos_feed.get()
+
+                # Sentinel value found, exit program
+                if tip_position is None and tip_ori is None:
                     break
 
-                # TODO: check and finish use of image proc in manual_brachy function
-                if current_frame is not None:
-                    tip_position, tip_ori = position_from_image(current_frame, "config.ini", flip='yes', filtering='yes', show='yes')
+                logger.info("Needletip is currently at {}".format(tip_position))
+                logger.info("Needle orientation is currently {}".format(tip_ori))
 
-                    if tip_position is None or tip_ori is None:
-                        continue
+            # Retrieve any user inputs
+            events = pygame.event.get()
+            input_method.get_direction_from_pygame_events(input_feed, events)
 
-                    logger.info("Needletip is currently at {}".format(tip_position))
-                    logger.info("Needle orientation is currently {}".format(tip_ori))
+            direction = None
 
+            if not input_feed.empty():
+                direction = input_feed.get()
 
-                events = pygame.event.get()
-                input_method.get_direction_from_pygame_events(input_feed, events)
-            
-                direction = None
-                
-                if not input_feed.empty():
-                    direction = input_feed.get()
-                    if direction is None: # Sentinel value was put in Queue
-                        break
-
-                # Check if faulty input and try again
+                # Sentinel value was put in Queue, exit program
                 if direction is None:
-                    continue
-                if direction.direction == -1:
-                    continue
+                    break
 
-                # Move the needle:
-                if direction.direction == 100:
-                    logger.success("Init called: moving to zero then to 200 steps")
-                    self.initial_position()
-                else:
-                    logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
-                    self.move_to_dir_sync(direction)
+            # Check if faulty input and try again
+            if direction is None:
+                continue
+            if direction.direction == -1:
+                continue
+
+            # Move the needle:
+            if direction.direction == 100:
+                logger.success("Init called: moving to zero then to 200 steps")
+                self.initial_position()
+            else:
+                logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
+                # self.move_to_dir_sync(direction)
 
 
-        # Neatly exiting loop
-        print("Finished Program Execution", threading.active_count())
+        # Neatly exiting main program loop
         pygame.quit()
         image_acquisition.is_running = False
         input_method.is_running = False
 
         process_1.terminate()
         process_1.join()
-        thread_2.join()
+        thread_1.join()
+        print("Finished Program Execution.")
 
     def move_freely(self):
         """
