@@ -110,7 +110,6 @@ def position_from_image(in_image, configpath: str, flip='no', filtering='no', sh
     lines = cv2.HoughLinesP(edge_mask, 1, np.pi / theta_resolution, min_votes, minLineLength=minll, maxLineGap=maxlg)
 
     # sorting lines by smallest x1 coord
-    print("Lines found: ", lines)
     if lines is None:
         return None, None
 
