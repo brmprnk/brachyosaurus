@@ -23,8 +23,9 @@ from src.util import input_processing
 from src.util import logger
 # from src.util.saving import Saving
 import src.needle as needle
-# import src.image_position
-import src.reset_arduino as reset_arduino
+from src.reset_arduino import func as reset_arduino
+from src.image_proc2 import position_from_image
+# TODO: import configparser and use it to update parameters
 
 # pylint: disable=unused-argument
 # Disable unused argument because the SIGINT event handler always takes two parameters, but for the
@@ -55,6 +56,7 @@ SUBPARSERS = PARSER.add_subparsers(dest="subparse")
 PARSER_FESTO = SUBPARSERS.add_parser("FESTO", help="Control the FESTO linear stage")
 PARSER_NEEDLE = SUBPARSERS.add_parser("NEEDLE", help="Control the movement of the needle")
 PARSER_POSITION = SUBPARSERS.add_parser("POSITION", help="Gain feedback on the position of the needle")
+PARSER_IMAGEPROC = SUBPARSERS.add_parser("IMAGEPROC", help="Test the image processing performance")
 
 # Arguments for main module (Needle and Camera's)
 PARSER.add_argument("-init", action="store_true", help="Initializes Crouzet Stepper Motor positions.")
@@ -62,7 +64,7 @@ PARSER.add_argument("-manual", action="store_true", default=True,
                     help="Determines control mode. Automatic is the default.")
 PARSER.add_argument("--comport", type=str, default="COM5", action="store",
                     help="The comport on which the Arduino is connected")
-PARSER.add_argument("--startsteps", type=str, default="100", action="store",
+PARSER.add_argument("--startsteps", type=str, default="200", action="store",
                     help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
 PARSER.add_argument("--sensitivity", type=str, default="1", action="store",
                     help="The sensitivity of the needle controls (between 0 and 1) ")
@@ -91,6 +93,14 @@ PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="stor
 PARSER_NEEDLE.add_argument("--sensitivity", type=str, default="1", action="store",
                            help="The sensitivity of the needle controls (between 0 and 1) ")
 
+# Parser for the IMAGEPROC command with all the options
+PARSER_IMAGEPROC.add_argument("--configpath", type=str, default="config.ini", action="store",
+                           help="The path to the config file")
+PARSER_IMAGEPROC.add_argument("--imagepath", type=str, default="image_pos/photos/bending2.jpg", action="store",
+                           help="The path to the config file")
+PARSER_IMAGEPROC.add_argument("--filtering", type=str, default="no", action="store",
+                           help="Use a 3x3 low-pass filter before edge processing")
+
 
 def main() -> None:
     """
@@ -108,6 +118,8 @@ def main() -> None:
         linear_stage(parser)
     elif subparser == "NEEDLE":
         needle_movement(parser)
+    elif subparser == "IMAGEPROC":
+        image_proc(parser)
     else:
         if len(sys.argv) <= 1: # No optional arguments given --> print help
             PARSER.print_help()
@@ -119,7 +131,7 @@ def brachy_therapy(args: argparse.Namespace) -> None:
     Handler for positional feedback using image acquisition & processing
     """
     if args.init:
-        reset_arduino.func(args.comport, args.startsteps)
+        reset_arduino(args.comport, args.startsteps)
     else:
         logger.success("Starting Brachy Therapy.\n")
 
@@ -138,7 +150,7 @@ def needle_movement(args: argparse.Namespace) -> None:
     Handler for main purpose of program
     """
     if args.init:
-        reset_arduino.func(args.comport, args.startsteps)
+        reset_arduino(args.comport, args.startsteps)
     else:
         # Create Needle object
         board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
@@ -152,6 +164,22 @@ def linear_stage(args: argparse.Namespace) -> None:
     Handler for controlling the linear stage
     """
     # lin_move.move_to_pos(args.initpos, args.targetpos, args.speed)
+
+
+def image_proc(args: argparse.Namespace) -> None:
+    """"
+    Handler for testing image processing
+    useful for testing new functions on a single image
+    """
+    tip_position, tip_ori = position_from_image(args.imagepath, args.configpath, filtering=args.filtering, show='yes')
+    print("brachy.py: tip_position is: ", tip_position)
+    print("brachy.py: tip orientation is: ", tip_ori)
+
+    # TODO suggested route manager and movement recommendation code:
+    # waypoints2D = some function
+    # route_on_image(args.imagepath, waypoints2D)
+    # route_check(args.imagepath, tip_pos, tip_ori)  gives a recommendation to move
+
 
 if __name__ == '__main__':
     main()
