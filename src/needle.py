@@ -133,29 +133,29 @@ class Needle:
                 logger.error("No image received so can't get needle position")
             
 
-            events = pygame.event.get()
-            input_method.get_direction_from_pygame_events(input_feed, events)
-        
-            direction = None
+                events = pygame.event.get()
+                input_method.get_direction_from_pygame_events(input_feed, events)
             
-            if not input_feed.empty():
-                direction = input_feed.get()
-                if direction is None: # Sentinel value was put in Queue
-                    break
+                direction = None
+                
+                if not input_feed.empty():
+                    direction = input_feed.get()
+                    if direction is None: # Sentinel value was put in Queue
+                        break
 
-            # Check if faulty input and try again
-            if direction is None:
-                continue
-            if direction.direction == -1:
-                continue
+                # Check if faulty input and try again
+                if direction is None:
+                    continue
+                if direction.direction == -1:
+                    continue
 
-            # Move the needle:
-            if direction.direction == 100:
-                logger.success("Init called: moving to zero then to 200 steps")
-                self.initial_position()
-            else:
-                logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
-                self.move_to_dir_sync(direction)
+                # Move the needle:
+                if direction.direction == 100:
+                    logger.success("Init called: moving to zero then to 200 steps")
+                    self.initial_position()
+                else:
+                    logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
+                    self.move_to_dir_sync(direction)
 
 
         # Neatly exiting loop
