@@ -124,14 +124,16 @@ class Needle:
                 if current_frame is None: # Sentinel value received, exit pogram loop
                     break
 
-            # TODO: check and finish use of image proc in manual_brachy function
-            if current_frame is not None:
-                tip_position, tip_ori = position_from_image(current_frame, "config.ini", flip='yes', filtering='yes')
-                logger.info("Needletip is currently at {}".format(tip_position))
-                logger.info("Needle orientation is currently {}".format(tip_ori))
-            if current_frame is None:
-                logger.error("No image received so can't get needle position")
-            
+                # TODO: check and finish use of image proc in manual_brachy function
+                if current_frame is not None:
+                    tip_position, tip_ori = position_from_image(current_frame, "config.ini", flip='yes', filtering='yes', show='yes')
+
+                    if tip_position is None or tip_ori is None:
+                        continue
+
+                    logger.info("Needletip is currently at {}".format(tip_position))
+                    logger.info("Needle orientation is currently {}".format(tip_ori))
+
 
                 events = pygame.event.get()
                 input_method.get_direction_from_pygame_events(input_feed, events)

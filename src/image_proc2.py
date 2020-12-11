@@ -110,6 +110,10 @@ def position_from_image(in_image, configpath: str, flip='no', filtering='no', sh
     lines = cv2.HoughLinesP(edge_mask, 1, np.pi / theta_resolution, min_votes, minLineLength=minll, maxLineGap=maxlg)
 
     # sorting lines by smallest x1 coord
+    print("Lines found: ", lines)
+    if lines is None:
+        return None, None
+
     sorting_ind = np.argsort(lines[:, 0, 0])
     sorted_lines = np.zeros((len(lines[:, 0, 0]), 4), dtype='int16')
     for i in range(len(lines[:, 0, 0])):
@@ -147,7 +151,7 @@ def position_from_image(in_image, configpath: str, flip='no', filtering='no', sh
         num_arrow_image = cv2.arrowedLine(num_image, tip_pos, endpoint, yellow, 2)
         cv2.imshow('Numbered Lines', num_arrow_image)
         print("image_proc->show part: Press enter to stop showing image(s)")
-        if cv2.waitKey(0) == 13:
+        if cv2.waitKey(500) == 13:
             cv2.destroyAllWindows()
 
     return tip_pos, tip_dir
