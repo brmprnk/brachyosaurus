@@ -71,7 +71,7 @@ def line_numbering(in_image, lines_array):
     return in_image
 
 
-def position_from_image(in_image, configpath: str, filtering='no', show='no') -> (tuple, tuple):
+def position_from_image(in_image, configpath: str, flip='no', filtering='no', show='no') -> (tuple, tuple):
     """
     Version 1: provides position feedback by just returning x2 y2 of last line and its orientation (tip_pos, tip_dir)
         - in_image: the path to the image or the image itself from which the position is read
@@ -84,6 +84,9 @@ def position_from_image(in_image, configpath: str, filtering='no', show='no') ->
         in_image = cv2.imread(in_image)
     in_image = cv2.cvtColor(in_image, cv2.COLOR_BGR2GRAY)
     in_image = reduce_size(in_image, 40)
+    # flipping along vertical axis (left becomes right)
+    if flip == 'yes':
+        in_image = cv2.flip(in_image, 1)
 
     # Read required values from config.ini file
     config_object = ConfigParser()

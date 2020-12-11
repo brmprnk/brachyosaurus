@@ -126,8 +126,9 @@ class Needle:
 
             # TODO: check and finish use of image proc in manual_brachy function
             if current_frame is not None:
-                tip_position, tip_ori = position_from_image(current_frame, "config.ini", filtering='yes')
+                tip_position, tip_ori = position_from_image(current_frame, "config.ini", flip='yes', filtering='yes')
                 logger.info("Needletip is currently at {}".format(tip_position))
+                logger.info("Needle orientation is currently {}".format(tip_ori))
             if current_frame is None:
                 logger.error("No image received so can't get needle position")
             
