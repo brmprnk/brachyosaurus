@@ -149,11 +149,11 @@ def needle_movement(args: argparse.Namespace) -> None:
     """
     Handler for main purpose of program
     """
+    # Create Needle object
+    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
     if args.init:
-        reset_arduino(args.comport, args.startsteps)
+        board_controller.initial_position()
     else:
-        # Create Needle object
-        board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
         # Call its movement function
         board_controller.move_freely()
 
@@ -163,7 +163,9 @@ def linear_stage(args: argparse.Namespace) -> None:
     """
     Handler for controlling the linear stage
     """
-    # lin_move.move_to_pos(args.initpos, args.targetpos, args.speed)
+    # Create Needle object
+    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
+    board_controller.festo_move(args.targetpos, args.speed)
 
 
 def image_proc(args: argparse.Namespace) -> None:

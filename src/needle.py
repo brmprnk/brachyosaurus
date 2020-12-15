@@ -9,6 +9,8 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from queue import LifoQueue
 import pyfirmata
 import pygame
+from labjack import ljm
+from configparser import ConfigParser
 
 from src.controls import stepper_motor
 from src.controls.controller import Controller
@@ -20,13 +22,15 @@ from src.image_proc2 import position_from_image
 class Needle:
     """
     Needle Class.
-    Configures setup of the linear motors and Arduino.
-    Functions as a manager for the program, always knows what is the status.
+    Configures setup of the linear motors, Arduino and FESTO stage.
+    Functions as a manager for the program, always knows what is the status of needle controlling parts.
     """
 
-    def __init__(self, comport, startsteps, sensitivity):
-        self.port = comport
+    def __init__(self, comport_arduino, startsteps, sensitivity):
+
+        self.port = comport_arduino
         self.startcount = startsteps
+
         self.sensitivity = float(sensitivity)
         self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
@@ -53,6 +57,56 @@ class Needle:
             6: [0],
             7: [0, 3],
         }
+
+        """
+        FESTO section
+        !!! to use FESTO:    first upload "FESTO_controlv3.lua" to the T7 with Kipling 3 software
+                            then close the connection with Kipling 3 software
+        """
+        # config
+        config_object = ConfigParser()
+        config_object.read('config.ini')
+        festo = config_object["FESTO"]
+
+        self.init_FESTO_pos = int(festo["initial_pos"])
+        self.init_FESTO_speed = float(festo["initial_speed"])
+
+        self.AIN0addr = 0               # position (0-10V)
+        self.DAC0addr = 1000            # speed ref.signal (2.5V)
+        self.DAC1addr = 1002            # speed out signal (-2.5 - 2.5V)
+        self.initialpos_addr = 46000
+        self.targetpos_addr = 46002
+        self.speed_addr = 46004
+        self.enable_addr = 46008
+        self.f_datatype = ljm.constants.FLOAT32
+        self.i_datatype = ljm.constants.UINT16
+
+        self.offsetV = 2.5              # (offsetV+2.5V on DAC1 = 25 mm/s)
+        self.offV = 0.0299544557929039  # low voltage that T7 can certainly output
+        self.maxpos = 50                # mm
+        self.minpos = 3                 # mm
+
+        try:
+            FESTO_handle = ljm.openS("ANY", "USB", "ANY")
+        except ljm.LJMError as error:
+            FESTO_handle = None
+            logger.error("No FESTO_handle: thus not able to use the FESTO functions \n Error presented: " + str(error))
+
+        if FESTO_handle is not None:
+            self.FESTO_handle = FESTO_handle
+            # Set initial positions (keep target pos at 0 at the start)
+            ljm.eWriteAddress(self.FESTO_handle, self.initialpos_addr, self.f_datatype, self.init_FESTO_pos)
+            ljm.eWriteAddress(self.FESTO_handle, self.targetpos_addr, self.f_datatype, 0)
+            # Set speed
+            ljm.eWriteAddress(self.FESTO_handle, self.speed_addr, self.f_datatype, self.init_FESTO_speed)
+            logger.success("FESTO connected, handle is available, init is set, current position =" + str(ljm.eReadAddress(self.FESTO_handle, self.AIN0addr, self.f_datatype)))
+            time.sleep(0.3)
+
+            # Enable init LUA program
+            ljm.eWriteAddress(self.FESTO_handle, self.enable_addr, self.f_datatype, 1)
+            logger.success("FESTO moving to initial position")
+        else:
+            self.FESTO_handle = None
 
     def default_motor_setup(self):
         """
@@ -126,7 +180,7 @@ class Needle:
 
                 # TODO: check and finish use of image proc in manual_brachy function
                 if current_frame is not None:
-                    tip_position, tip_ori = position_from_image(current_frame, "config.ini", flip='yes', filtering='yes', show='yes')
+                    tip_position, tip_ori = position_from_image(current_frame, "config.ini", flip='yes', filtering='yes', show='no')
 
                     if tip_position is None or tip_ori is None:
                         continue
@@ -153,7 +207,7 @@ class Needle:
 
                 # Move the needle:
                 if direction.direction == 100:
-                    logger.success("Init called: moving to zero then to 200 steps")
+                    logger.success("Init called: moving motors to zero then to 200 steps, FESTO to initial position")
                     self.initial_position()
                 else:
                     logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
@@ -214,8 +268,9 @@ class Needle:
 
     def initial_position(self):
         """
-        Stuur de motoren terug naar 200
+        Stuur de FESTO naar init en motoren terug naar 200
         """
+        self.festo_move(self.init_FESTO_pos, self.init_FESTO_speed)
         for motor_i in range(len(self.motors)):
             position = self.motors[motor_i].get_count()
             steps_diff = abs(200 - position)
@@ -230,7 +285,8 @@ class Needle:
         doe één stap op motor 1 dan op 2 dan 3 dan 4 dan weer één op 1 etc tot alle stappen zijn bereikt
         gdo = get direction output (an object of the class Output(direction, stepsout) )
         """
-
+        # TODO implement - FESTO move commands
+        #                - automated needle speed adjustment
         sx = round(self.sensitivity * gdo.stepsx)
         sy = round(self.sensitivity * gdo.stepsy)
 
@@ -293,3 +349,14 @@ class Needle:
         self.motors[1].get_count()
         self.motors[2].get_count()
         self.motors[3].get_count()
+
+    def festo_move(self, targetpos: int, speed: float) -> None:
+        """
+        Moves the FESTO stage to the "targetpos" with "speed"
+            !!! to use this function see the instructions in the FESTO section in __init__ !!!
+
+            1) writes "targetpos" and "speed" to the T7's data registers
+            2) the LUA script takes care of the movement
+        """
+        ljm.eWriteAddress(self.FESTO_handle, self.targetpos_addr, self.f_datatype, targetpos)
+        ljm.eWriteAddress(self.FESTO_handle, self.speed_addr, self.f_datatype, speed)
