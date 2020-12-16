@@ -1,0 +1,374 @@
+image_proc->show part: endpoint arrow =  (773, 271)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.04283428192138672
+Needletip is currently at (764, 272)
+Needle orientation is currently (0.9947814386110523, -0.10202886549856946)
+image_proc: iteration 1 finished, 1 lines found --> decremented params
+image_proc: iteration 2 finished, 1 lines found --> decremented params
+image_proc: iteration 3 finished, 1 lines found --> decremented params
+image_proc: iteration 4 finished, 1 lines found --> decremented params
+image_proc: iteration 5 finished, 1 lines found --> decremented params
+image_proc: iteration 6 finished, 1 lines found --> decremented params
+image_proc: iteration 7 finished, 1 lines found --> decremented params
+image_proc: iteration 8 finished, 1 lines found --> decremented params
+image_proc: iteration 9 finished, 1 lines found --> decremented params
+image_proc: iteration 10 finished, 1 lines found --> decremented params
+image_proc: iteration 11 finished, 1 lines found --> decremented params
+image_proc: iteration 12 finished, 2 lines found --> decremented params
+image_proc: iteration 13 finished, 1 lines found --> decremented params
+image_proc: iteration 14 finished, 1 lines found --> decremented params
+image_proc: iteration 15 finished, 1 lines found --> decremented params
+image_proc: iteration 16 finished, 1 lines found --> decremented params
+image_proc: iteration 17 finished, 1 lines found --> decremented params
+image_proc: iteration 18 finished, 1 lines found --> decremented params
+image_proc: iteration 19 finished, 2 lines found --> decremented params
+image_proc: iteration 20 finished, 1 lines found --> decremented params
+image_proc: iteration 21 finished, 2 lines found --> decremented params
+image_proc: iteration 22 finished, 4 lines found --> decremented params
+image_proc: iteration 23 finished, 4 lines found --> decremented params
+image_proc: iteration 24 finished, 3 lines found --> decremented params
+image_proc: iteration 25 finished, 5 lines found --> decremented params
+image_proc: iteration 26 finished, 6 lines found --> decremented params
+image_proc: iteration 27 finished, 13 lines found --> decremented params
+image_proc2: 13 lines detected -> sorted_lines =
+ [[107 199 135 199]
+ [107 205 118 203]
+ [111 184 140 190]
+ [122 186 160 192]
+ [138 209 156 211]
+ [138 200 156 208]
+ [140 210 153 213]
+ [145 207 162 218]
+ [161 189 276 203]
+ [270 202 347 212]
+ [714 279 760 285]
+ [741 283 767 286]
+ [745 287 766 289]]
+image_proc->show part: endpoint arrow =  (775, 289)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.04089093208312988
+Needletip is currently at (766, 289)
+Needle orientation is currently (0.9954954725939521, 0.09480909262799544)
+image_proc: iteration 1 finished, 2 lines found --> decremented params
+image_proc: iteration 2 finished, 2 lines found --> decremented params
+image_proc: iteration 3 finished, 3 lines found --> decremented params
+image_proc: iteration 4 finished, 3 lines found --> decremented params
+image_proc: iteration 5 finished, 4 lines found --> decremented params
+image_proc: iteration 6 finished, 3 lines found --> decremented params
+image_proc: iteration 7 finished, 3 lines found --> decremented params
+image_proc: iteration 8 finished, 4 lines found --> decremented params
+image_proc: iteration 9 finished, 3 lines found --> decremented params
+image_proc: iteration 10 finished, 4 lines found --> decremented params
+image_proc: iteration 11 finished, 5 lines found --> decremented params
+image_proc: iteration 12 finished, 4 lines found --> decremented params
+image_proc: iteration 13 finished, 5 lines found --> decremented params
+image_proc: iteration 14 finished, 5 lines found --> decremented params
+image_proc: iteration 15 finished, 4 lines found --> decremented params
+image_proc: iteration 16 finished, 6 lines found --> decremented params
+image_proc: iteration 17 finished, 5 lines found --> decremented params
+image_proc: iteration 18 finished, 5 lines found --> decremented params
+image_proc: iteration 19 finished, 7 lines found --> decremented params
+image_proc: iteration 20 finished, 9 lines found --> decremented params
+image_proc: iteration 21 finished, 9 lines found --> decremented params
+image_proc: iteration 22 finished, 10 lines found --> decremented params
+image_proc2: 10 lines detected -> sorted_lines =
+ [[118 207 139 210]
+ [163 190 436 224]
+ [288 234 408 249]
+ [373 244 564 270]
+ [416 222 519 235]
+ [513 235 598 246]
+ [540 266 608 276]
+ [598 274 762 297]
+ [720 285 767 292]
+ [721 282 767 289]]
+image_proc->show part: endpoint arrow =  (776, 290)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.04089069366455078
+Needletip is currently at (767, 289)
+Needle orientation is currently (0.9886188373396114, 0.1504419969864626)
+image_proc: iteration 1 finished, 1 lines found --> decremented params
+image_proc: iteration 2 finished, 2 lines found --> decremented params
+image_proc: iteration 3 finished, 1 lines found --> decremented params
+image_proc: iteration 4 finished, 1 lines found --> decremented params
+image_proc: iteration 5 finished, 1 lines found --> decremented params
+image_proc: iteration 6 finished, 2 lines found --> decremented params
+image_proc: iteration 7 finished, 2 lines found --> decremented params
+image_proc: iteration 8 finished, 2 lines found --> decremented params
+image_proc: iteration 9 finished, 3 lines found --> decremented params
+image_proc: iteration 10 finished, 3 lines found --> decremented params
+image_proc: iteration 11 finished, 3 lines found --> decremented params
+image_proc: iteration 12 finished, 4 lines found --> decremented params
+image_proc: iteration 13 finished, 4 lines found --> decremented params
+image_proc: iteration 14 finished, 4 lines found --> decremented params
+image_proc: iteration 15 finished, 4 lines found --> decremented params
+image_proc: iteration 16 finished, 3 lines found --> decremented params
+image_proc: iteration 17 finished, 8 lines found --> decremented params
+image_proc: iteration 18 finished, 4 lines found --> decremented params
+image_proc: iteration 19 finished, 4 lines found --> decremented params
+image_proc: iteration 20 finished, 7 lines found --> decremented params
+image_proc: iteration 21 finished, 6 lines found --> decremented params
+image_proc: iteration 22 finished, 9 lines found --> decremented params
+image_proc: iteration 23 finished, 7 lines found --> decremented params
+image_proc: iteration 24 finished, 10 lines found --> decremented params
+image_proc2: 10 lines detected -> sorted_lines =
+ [[ 99 205 106 206]
+ [115 183 165 191]
+ [153 194 163 195]
+ [167 188 359 212]
+ [290 232 346 239]
+ [341 238 461 254]
+ [398 245 767 296]
+ [562 267 747 293]
+ [721 280 750 284]
+ [721 283 767 290]]
+image_proc->show part: endpoint arrow =  (776, 291)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.03992867469787598
+Needletip is currently at (767, 290)
+Needle orientation is currently (0.9886188373396114, 0.1504419969864626)
+image_proc: iteration 1 finished, 1 lines found --> decremented params
+image_proc: iteration 2 finished, 1 lines found --> decremented params
+image_proc: iteration 3 finished, 3 lines found --> decremented params
+image_proc: iteration 4 finished, 2 lines found --> decremented params
+image_proc: iteration 5 finished, 2 lines found --> decremented params
+image_proc: iteration 6 finished, 3 lines found --> decremented params
+image_proc: iteration 7 finished, 3 lines found --> decremented params
+image_proc: iteration 8 finished, 3 lines found --> decremented params
+image_proc: iteration 9 finished, 3 lines found --> decremented params
+image_proc: iteration 10 finished, 3 lines found --> decremented params
+image_proc: iteration 11 finished, 3 lines found --> decremented params
+image_proc: iteration 12 finished, 3 lines found --> decremented params
+image_proc: iteration 13 finished, 3 lines found --> decremented params
+image_proc: iteration 14 finished, 3 lines found --> decremented params
+image_proc: iteration 15 finished, 3 lines found --> decremented params
+image_proc: iteration 16 finished, 3 lines found --> decremented params
+image_proc: iteration 17 finished, 4 lines found --> decremented params
+image_proc: iteration 18 finished, 5 lines found --> decremented params
+image_proc: iteration 19 finished, 4 lines found --> decremented params
+image_proc: iteration 20 finished, 5 lines found --> decremented params
+image_proc: iteration 21 finished, 7 lines found --> decremented params
+image_proc: iteration 22 finished, 6 lines found --> decremented params
+image_proc: iteration 23 finished, 11 lines found --> decremented params
+image_proc2: 11 lines detected -> sorted_lines =
+ [[116 186 165 195]
+ [168 191 235 200]
+ [214 197 285 206]
+ [288 235 343 242]
+ [291 207 355 215]
+ [372 245 620 279]
+ [603 276 668 286]
+ [625 279 706 291]
+ [682 287 766 299]
+ [721 284 763 290]
+ [722 287 767 293]]
+image_proc->show part: endpoint arrow =  (776, 294)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.03893089294433594
+Needletip is currently at (767, 293)
+Needle orientation is currently (0.9912279006826347, 0.13216372009101796)
+image_proc: iteration 1 finished, 0 lines found --> decremented params
+image_proc: iteration 2 finished, 0 lines found --> decremented params
+image_proc: iteration 3 finished, 0 lines found --> decremented params
+image_proc: iteration 4 finished, 0 lines found --> decremented params
+image_proc: iteration 5 finished, 0 lines found --> decremented params
+image_proc: iteration 6 finished, 0 lines found --> decremented params
+image_proc: iteration 7 finished, 1 lines found --> decremented params
+image_proc: iteration 8 finished, 1 lines found --> decremented params
+image_proc: iteration 9 finished, 1 lines found --> decremented params
+image_proc: iteration 10 finished, 1 lines found --> decremented params
+image_proc: iteration 11 finished, 1 lines found --> decremented params
+image_proc: iteration 12 finished, 1 lines found --> decremented params
+image_proc: iteration 13 finished, 1 lines found --> decremented params
+image_proc: iteration 14 finished, 1 lines found --> decremented params
+image_proc: iteration 15 finished, 1 lines found --> decremented params
+image_proc: iteration 16 finished, 1 lines found --> decremented params
+image_proc: iteration 17 finished, 1 lines found --> decremented params
+image_proc: iteration 18 finished, 1 lines found --> decremented params
+image_proc: iteration 19 finished, 2 lines found --> decremented params
+image_proc: iteration 20 finished, 1 lines found --> decremented params
+image_proc: iteration 21 finished, 1 lines found --> decremented params
+image_proc: iteration 22 finished, 3 lines found --> decremented params
+image_proc: iteration 23 finished, 5 lines found --> decremented params
+image_proc: iteration 24 finished, 6 lines found --> decremented params
+image_proc: iteration 25 finished, 4 lines found --> decremented params
+image_proc: iteration 26 finished, 4 lines found --> decremented params
+image_proc: iteration 27 finished, 10 lines found --> decremented params
+image_proc2: 10 lines detected -> sorted_lines =
+ [[113 199 125 200]
+ [115 206 118 180]
+ [117 183 167 191]
+ [117 199 125 199]
+ [124 192 137 199]
+ [140 198 163 205]
+ [168 188 356 212]
+ [722 282 767 288]
+ [723 285 767 291]
+ [726 282 754 286]]
+image_proc->show part: endpoint arrow =  (763, 287)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.04188847541809082
+Needletip is currently at (754, 286)
+Needle orientation is currently (0.9899494936611665, 0.1414213562373095)
+image_proc: iteration 1 finished, 0 lines found --> decremented params
+image_proc: iteration 2 finished, 0 lines found --> decremented params
+image_proc: iteration 3 finished, 0 lines found --> decremented params
+image_proc: iteration 4 finished, 0 lines found --> decremented params
+image_proc: iteration 5 finished, 0 lines found --> decremented params
+image_proc: iteration 6 finished, 0 lines found --> decremented params
+image_proc: iteration 7 finished, 0 lines found --> decremented params
+image_proc: iteration 8 finished, 0 lines found --> decremented params
+image_proc: iteration 9 finished, 0 lines found --> decremented params
+image_proc: iteration 10 finished, 0 lines found --> decremented params
+image_proc: iteration 11 finished, 0 lines found --> decremented params
+image_proc: iteration 12 finished, 0 lines found --> decremented params
+image_proc: iteration 13 finished, 0 lines found --> decremented params
+image_proc: iteration 14 finished, 0 lines found --> decremented params
+image_proc: iteration 15 finished, 0 lines found --> decremented params
+image_proc: iteration 16 finished, 0 lines found --> decremented params
+image_proc: iteration 17 finished, 0 lines found --> decremented params
+image_proc: iteration 18 finished, 0 lines found --> decremented params
+image_proc: iteration 19 finished, 0 lines found --> decremented params
+image_proc: iteration 20 finished, 0 lines found --> decremented params
+image_proc: iteration 21 finished, 0 lines found --> decremented params
+image_proc: iteration 22 finished, 0 lines found --> decremented params
+image_proc: iteration 23 finished, 0 lines found --> decremented params
+image_proc: iteration 24 finished, 0 lines found --> decremented params
+image_proc: iteration 25 finished, 1 lines found --> decremented params
+image_proc: iteration 26 finished, 2 lines found --> decremented params
+image_proc: iteration 27 finished, 5 lines found --> decremented params
+image_proc: iteration 28 finished, 9 lines found --> decremented params
+image_proc: iteration 29 finished, 14 lines found --> decremented params
+image_proc2: 14 lines detected -> sorted_lines =
+ [[  0 396  11 393]
+ [ 10 394  13 391]
+ [ 13 392  26 379]
+ [ 16 390  18 388]
+ [ 27 375  40 360]
+ [359  39 368   4]
+ [363  27 368   5]
+ [366  38 373  10]
+ [369  30 373   4]
+ [390  20 394   2]
+ [399  15 408   6]
+ [401  17 406   0]
+ [402   5 402   1]
+ [404  22 410   0]]
+image_proc->show part: endpoint arrow =  (420, -38)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.0359044075012207
+Needletip is currently at (410, 0)
+Needle orientation is currently (0.2631174057921088, -0.9647638212377322)
+image_proc: iteration 1 finished, 0 lines found --> decremented params
+image_proc: iteration 2 finished, 0 lines found --> decremented params
+image_proc: iteration 3 finished, 0 lines found --> decremented params
+image_proc: iteration 4 finished, 0 lines found --> decremented params
+image_proc: iteration 5 finished, 0 lines found --> decremented params
+image_proc: iteration 6 finished, 0 lines found --> decremented params
+image_proc: iteration 7 finished, 0 lines found --> decremented params
+image_proc: iteration 8 finished, 0 lines found --> decremented params
+image_proc: iteration 9 finished, 0 lines found --> decremented params
+image_proc: iteration 10 finished, 1 lines found --> decremented params
+image_proc: iteration 11 finished, 1 lines found --> decremented params
+image_proc: iteration 12 finished, 1 lines found --> decremented params
+image_proc: iteration 13 finished, 3 lines found --> decremented params
+image_proc: iteration 14 finished, 3 lines found --> decremented params
+image_proc: iteration 15 finished, 3 lines found --> decremented params
+image_proc: iteration 16 finished, 4 lines found --> decremented params
+image_proc: iteration 17 finished, 4 lines found --> decremented params
+image_proc: iteration 18 finished, 5 lines found --> decremented params
+image_proc: iteration 19 finished, 7 lines found --> decremented params
+image_proc: iteration 20 finished, 4 lines found --> decremented params
+image_proc: iteration 21 finished, 12 lines found --> decremented params
+image_proc2: 12 lines detected -> sorted_lines =
+ [[562 137 614 104]
+ [662 377 663 357]
+ [662 431 662 414]
+ [664 344 664 331]
+ [667 329 668 302]
+ [668 292 668 278]
+ [669 261 669 251]
+ [674 178 676 130]
+ [674 195 674 179]
+ [681  99 681  85]
+ [681  84 681  74]
+ [694  30 727   4]]
+image_proc->show part: endpoint arrow =  (758, -20)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.031914472579956055
+Needletip is currently at (727, 4)
+Needle orientation is currently (0.7854916722275356, -0.6188722266035128)
+image_proc: iteration 1 finished, 0 lines found --> decremented params
+image_proc: iteration 2 finished, 0 lines found --> decremented params
+image_proc: iteration 3 finished, 0 lines found --> decremented params
+image_proc: iteration 4 finished, 0 lines found --> decremented params
+image_proc: iteration 5 finished, 1 lines found --> decremented params
+image_proc: iteration 6 finished, 1 lines found --> decremented params
+image_proc: iteration 7 finished, 2 lines found --> decremented params
+image_proc: iteration 8 finished, 3 lines found --> decremented params
+image_proc: iteration 9 finished, 2 lines found --> decremented params
+image_proc: iteration 10 finished, 3 lines found --> decremented params
+image_proc: iteration 11 finished, 2 lines found --> decremented params
+image_proc: iteration 12 finished, 3 lines found --> decremented params
+image_proc: iteration 13 finished, 2 lines found --> decremented params
+image_proc: iteration 14 finished, 2 lines found --> decremented params
+image_proc: iteration 15 finished, 3 lines found --> decremented params
+image_proc: iteration 16 finished, 3 lines found --> decremented params
+image_proc: iteration 17 finished, 4 lines found --> decremented params
+image_proc: iteration 18 finished, 5 lines found --> decremented params
+image_proc: iteration 19 finished, 6 lines found --> decremented params
+image_proc: iteration 20 finished, 5 lines found --> decremented params
+image_proc: iteration 21 finished, 8 lines found --> decremented params
+image_proc: iteration 22 finished, 7 lines found --> decremented params
+image_proc: iteration 23 finished, 13 lines found --> decremented params
+image_proc2: 13 lines detected -> sorted_lines =
+ [[138  88 161  91]
+ [550 418 552 368]
+ [554 339 554 331]
+ [557 300 558 261]
+ [560 247 563 197]
+ [563 196 567 134]
+ [580 330 661 350]
+ [581 312 583 287]
+ [584 267 585 251]
+ [586 244 587 229]
+ [588 222 589 208]
+ [589 218 593 154]
+ [594 152 595 133]]
+image_proc->show part: endpoint arrow =  (597, 94)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.03591132164001465
+Needletip is currently at (595, 133)
+Needle orientation is currently (0.052558833122763673, -0.9986178293325098)
+image_proc: iteration 1 finished, 5 lines found --> decremented params
+image_proc: iteration 2 finished, 5 lines found --> decremented params
+image_proc: iteration 3 finished, 6 lines found --> decremented params
+image_proc: iteration 4 finished, 6 lines found --> decremented params
+image_proc: iteration 5 finished, 7 lines found --> decremented params
+image_proc: iteration 6 finished, 6 lines found --> decremented params
+image_proc: iteration 7 finished, 6 lines found --> decremented params
+image_proc: iteration 8 finished, 6 lines found --> decremented params
+image_proc: iteration 9 finished, 9 lines found --> decremented params
+image_proc: iteration 10 finished, 6 lines found --> decremented params
+image_proc: iteration 11 finished, 7 lines found --> decremented params
+image_proc: iteration 12 finished, 8 lines found --> decremented params
+image_proc: iteration 13 finished, 9 lines found --> decremented params
+image_proc: iteration 14 finished, 10 lines found --> decremented params
+image_proc2: 10 lines detected -> sorted_lines =
+ [[439 431 452 174]
+ [451 288 459 144]
+ [453 173 454 146]
+ [500 372 511 159]
+ [511  64 624  54]
+ [517 335 522 272]
+ [526 207 533  72]
+ [526 250 690 276]
+ [589  67 716  58]
+ [703 271 706 338]]
+image_proc->show part: endpoint arrow =  (707, 377)
+image_proc->show part: Press enter to stop showing image(s)
+SUCCESS: processing took 0.0578455924987793
+Needletip is currently at (706, 338)
+Needle orientation is currently (0.04473130094381649, 0.9989990544119017)
+ERROR: Not able to retrieve image from VideoCapture Object. Exiting Process.
+Finished Program Execution.

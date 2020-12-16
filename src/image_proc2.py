@@ -100,6 +100,7 @@ def position_from_image(in_image, configpath: str, flip='no', filtering='no', sh
     min_votes = int(imagepos["min_votes"])
     minll = int(imagepos["minll"])
     maxlg = int(imagepos["maxlg"])
+    minlines = int(imagepos["minimum_lines"])
 
     # lpf filtering if selected see 'lpf' function above
     if filtering == 'yes':
@@ -107,7 +108,21 @@ def position_from_image(in_image, configpath: str, flip='no', filtering='no', sh
 
     # creating edge mask then performing line detection
     edge_mask = cv2.Canny(image=in_image, threshold1=lower_threshold, threshold2=upper_threshold)
-    lines = cv2.HoughLinesP(edge_mask, 1, np.pi / theta_resolution, min_votes, minLineLength=minll, maxLineGap=maxlg)
+    N = 0
+    i = 0
+    while N < minlines:
+        i = i + 1
+        lines = cv2.HoughLinesP(edge_mask, 1, np.pi / theta_resolution, min_votes, minLineLength=minll, maxLineGap=maxlg)
+        min_votes = min_votes - 5
+        minll = minll - 1
+        if min_votes < 0 or minll < 0:
+            print("image_proc: no lines found by decrementing params !!!")
+            break
+        if lines is None:
+            N = 0
+        else:
+            N = len(lines[:, 0, 0])
+        print("image_proc: iteration " + str(i) + " finished, "+str(N)+" lines found --> decremented params")
 
     # sorting lines by smallest x1 coord
     if lines is None:
