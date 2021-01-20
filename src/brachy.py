@@ -98,7 +98,7 @@ PARSER_IMAGEPROC.add_argument("--configpath", type=str, default="config.ini", ac
                            help="The path to the config file")
 PARSER_IMAGEPROC.add_argument("--imagepath", type=str, default="image_pos/photos/bending2.jpg", action="store",
                            help="The path to the config file")
-PARSER_IMAGEPROC.add_argument("--filtering", type=str, default="no", action="store",
+PARSER_IMAGEPROC.add_argument("--filtering", type=str, default="yes", action="store",
                            help="Use a 3x3 low-pass filter before edge processing")
 
 

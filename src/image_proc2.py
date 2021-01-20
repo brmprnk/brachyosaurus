@@ -71,7 +71,7 @@ def line_numbering(in_image, lines_array):
     return in_image
 
 
-def position_from_image(in_image, configpath: str, flip='no', filtering='no', show='no') -> (tuple, tuple):
+def position_from_image(in_image, configpath: str, flip='no', filtering='yes', show='no') -> (tuple, tuple):
     """
     Version 1: provides position feedback by just returning x2 y2 of last line and its orientation (tip_pos, tip_dir)
         - in_image: the path to the image or the image itself from which the position is read
@@ -128,7 +128,12 @@ def position_from_image(in_image, configpath: str, flip='no', filtering='no', sh
     if lines is None:
         return None, None
 
-    sorting_ind = np.argsort(lines[:, 0, 0])
+    #reformatting lines:
+    new_lines = np.zeros((len(lines[:, 0, 0]), 4), dtype='int16')
+    for i in range(len(lines[:, 0, 0])):
+        new_lines[i, :] = lines[i, 0, :]
+    sum_array = np.sum(new_lines, axis=1)
+    sorting_ind = np.argsort(sum_array)
     sorted_lines = np.zeros((len(lines[:, 0, 0]), 4), dtype='int16')
     for i in range(len(lines[:, 0, 0])):
         row_to_append = np.array(lines[sorting_ind[i], 0, :], dtype='int16')
@@ -165,7 +170,7 @@ def position_from_image(in_image, configpath: str, flip='no', filtering='no', sh
         num_arrow_image = cv2.arrowedLine(num_image, tip_pos, endpoint, yellow, 2)
         cv2.imshow('Numbered Lines', num_arrow_image)
         print("image_proc->show part: Press enter to stop showing image(s)")
-        if cv2.waitKey(1) == 13:
+        if cv2.waitKey(0) == 13:
             cv2.destroyAllWindows()
 
     return tip_pos, tip_dir
