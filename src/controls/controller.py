@@ -28,12 +28,16 @@ class Direction(Enum):
     downleft = 5
     left = 6
     upleft = 7
+    init = 100
+    festo_backward = 200
+    festo_forward = 201
 
 # pylint: disable=too-few-public-methods
 class Output:
     """
     Class that encapsulates the result of a Controller press.
     A user input should have a direction, but it needs to incorporate how far it should move.
+    Used in other files and referred to as Get Direction Output (GDO).
     """
     def __init__(self, direction, stepsout):
         self.direction = direction
@@ -88,7 +92,7 @@ class Controller:
 
                 input_feed.put(Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100]))
 
-            # Joysyick controls
+            # Joystick controls
             if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
                 input_feed.put(self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
@@ -138,6 +142,7 @@ class Controller:
                 # End loop when escape is pressed
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     sys.exit()
+                # output for keyboard steering
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     up_arrow = pressed[pygame.K_UP]
                     down_arrow = pressed[pygame.K_DOWN]
@@ -146,10 +151,15 @@ class Controller:
 
                     return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
 
+                # output for controller steering: 1) left stick needle movement 2) init call on all 3) right stick festo
                 if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
                     return self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1)
                 if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
                     return Output(100, [100, 100])
+                if event.type == pygame.JOYBUTTONDOWN and event.button == 4:
+                    return Output(200, [1, 1])
+                if event.type == pygame.JOYBUTTONDOWN and event.button == 5:
+                    return Output(201, [1, 1])
 
 
     @staticmethod

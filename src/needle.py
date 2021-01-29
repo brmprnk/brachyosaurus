@@ -30,7 +30,6 @@ class Needle:
 
         self.port = comport_arduino
         self.startcount = startsteps
-
         self.sensitivity = float(sensitivity)
         self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
@@ -85,6 +84,7 @@ class Needle:
         self.offV = 0.0299544557929039  # low voltage that T7 can certainly output
         self.maxpos = 50                # mm
         self.minpos = 3                 # mm
+        self.currentpos = self.init_FESTO_pos
 
         try:
             FESTO_handle = ljm.openS("ANY", "USB", "ANY")
@@ -94,9 +94,9 @@ class Needle:
 
         if FESTO_handle is not None:
             self.FESTO_handle = FESTO_handle
-            # Set initial positions (keep target pos at 0 at the start)
+            # Set initial positions (keep target pos at init_FESTO_pos at the start)
             ljm.eWriteAddress(self.FESTO_handle, self.initialpos_addr, self.f_datatype, self.init_FESTO_pos)
-            ljm.eWriteAddress(self.FESTO_handle, self.targetpos_addr, self.f_datatype, 0)
+            ljm.eWriteAddress(self.FESTO_handle, self.targetpos_addr, self.f_datatype, self.init_FESTO_pos)
             # Set speed
             ljm.eWriteAddress(self.FESTO_handle, self.speed_addr, self.f_datatype, self.init_FESTO_speed)
             logger.success("FESTO connected, handle is available, init is set, current position =" + str(ljm.eReadAddress(self.FESTO_handle, self.AIN0addr, self.f_datatype)))
@@ -206,6 +206,7 @@ class Needle:
                     continue
 
                 # Move the needle:
+                # TODO: implement festo_move() on controller commands (like in move_freely())
                 if direction.direction == 100:
                     logger.success("Init called: moving motors to zero then to 200 steps, FESTO to initial position")
                     self.initial_position()
@@ -240,10 +241,18 @@ class Needle:
 
             # Move the needle:
             if dirOutput.direction == 100:
-                logger.success("Init called: moving to zero then to 200 steps")
+                logger.success("Init called: moving FESTO to init_FESTO_pos and needle to zero then to 200 steps")
                 self.initial_position()
             else:
                 logger.success("Moving to : {}".format(input_method.dir_to_text(dirOutput.direction)))
+                if dirOutput.direction == 200:
+                    self.festo_move(-3, self.init_FESTO_speed, relative=1)
+                    time.sleep(0.05)
+                    continue
+                if dirOutput.direction == 201:
+                    self.festo_move(3, self.init_FESTO_speed, relative=1)
+                    time.sleep(0.05)
+                    continue
                 self.move_to_dir_sync(dirOutput)
 
     def move_to_dir(self, gdo):
@@ -271,6 +280,7 @@ class Needle:
         Stuur de FESTO naar init en motoren terug naar 200
         """
         self.festo_move(self.init_FESTO_pos, self.init_FESTO_speed)
+        # TODO: consider disconnecting needle at this point (then clicking ENTER)
         for motor_i in range(len(self.motors)):
             position = self.motors[motor_i].get_count()
             steps_diff = abs(200 - position)
@@ -283,10 +293,9 @@ class Needle:
         """
         Krijg een richting --> Stuur de motors synchroon
         doe één stap op motor 1 dan op 2 dan 3 dan 4 dan weer één op 1 etc tot alle stappen zijn bereikt
-        gdo = get direction output (an object of the class Output(direction, stepsout) )
+        gdo = get direction output (an object of the class Output(direction: int, stepsout: tuple) )
         """
-        # TODO implement - FESTO move commands
-        #                - automated needle speed adjustment
+        # TODO implement automated needle speed adjustment
         sx = round(self.sensitivity * gdo.stepsx)
         sy = round(self.sensitivity * gdo.stepsy)
 
@@ -350,13 +359,25 @@ class Needle:
         self.motors[2].get_count()
         self.motors[3].get_count()
 
-    def festo_move(self, targetpos: int, speed: float) -> None:
+    def festo_move(self, targetpos: int, speed: float, relative=0) -> None:
         """
         Moves the FESTO stage to the "targetpos" with "speed"
             !!! to use this function see the instructions in the FESTO section in __init__ !!!
 
             1) writes "targetpos" and "speed" to the T7's data registers
             2) the LUA script takes care of the movement
+
+            *) if the movement is to be relative to current position use 'relative' = 1
         """
+        # relative function
+        if relative == 1:
+            if self.currentpos + targetpos < 0:
+                print("NEEDLE->festo_move: Warning, currentpos is below 0")
+            elif self.currentpos + targetpos > 50:
+                print("NEEDLE->festo_move: Warning, currentpos is going past 50")
+            targetpos = self.currentpos + targetpos
+
         ljm.eWriteAddress(self.FESTO_handle, self.targetpos_addr, self.f_datatype, targetpos)
         ljm.eWriteAddress(self.FESTO_handle, self.speed_addr, self.f_datatype, speed)
+
+        self.currentpos = targetpos

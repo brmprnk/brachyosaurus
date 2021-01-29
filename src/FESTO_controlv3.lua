@@ -106,14 +106,13 @@ while true do
   elseif tposV < vmin then
     tposV = vmin
   end
---  print("Main: tposV = ", tposV)
   
   if LJ.CheckInterval(0) then
     cposV = MB.R(0,3)
     if cposV > tposV+0.3 then 
       LJ.IntervalConfig(2,40)
       while true do
-        MB.W(1002,3, offsetV-speed*2)
+        MB.W(1002,3, offsetV-speed)
         if LJ.CheckInterval(2) then
           MB.W(1002,3, offsetV)
           break
@@ -131,7 +130,7 @@ while true do
     elseif cposV > tposV then 
       LJ.IntervalConfig(2,40)
       while true do
-        MB.W(1002,3, offsetV-0.2)
+        MB.W(1002,3, offsetV-0.18)
         if LJ.CheckInterval(2) then
           MB.W(1002,3, offsetV)
           break
