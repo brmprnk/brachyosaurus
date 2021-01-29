@@ -28,44 +28,47 @@ class Needle:
         self.port = comport
         self.startcount = startsteps
         self.sensitivity = float(sensitivity)
+        if self.sensitivity > 1:
+            self.sensitivity = 0.5
+            logger.info("Invalid sensitivity entered: new value = {}".format(self.sensitivity))
         self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
         self.motors = []
         self.default_motor_setup()
         self.dirpull = {
-            0: [1],
-            1: [0, 1],
-            2: [0],
-            3: [0, 3],
-            4: [3],
-            5: [2, 3],
-            6: [2],
-            7: [2, 1],
+            0: [0, 1],
+            1: [0],
+            2: [0, 3],
+            3: [3],
+            4: [2, 3],
+            5: [2],
+            6: [1, 2],
+            7: [1],
         }
 
         self.dirpush = {
-            0: [3],
-            1: [2, 3],
-            2: [2],
-            3: [2, 1],
-            4: [1],
-            5: [0, 1],
-            6: [0],
-            7: [0, 3],
+            0: [2, 3],
+            1: [2],
+            2: [1, 2],
+            3: [1],
+            4: [0, 1],
+            5: [0],
+            6: [0, 3],
+            7: [3],
         }
 
     def default_motor_setup(self):
         """
         Initializes default motor to Arduino board configuration
         """
-        motor0 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(3)),
-                                     self.board.get_pin('d:{}:o'.format(2)),
+        motor0 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(7)),
+                                     self.board.get_pin('d:{}:o'.format(6)),
                                      self.startcount, 0)
         motor1 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(5)),
                                      self.board.get_pin('d:{}:o'.format(4)),
                                      self.startcount, 1)
-        motor2 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(7)),
-                                     self.board.get_pin('d:{}:o'.format(6)),
+        motor2 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(3)),
+                                     self.board.get_pin('d:{}:o'.format(2)),
                                      self.startcount, 2)
         motor3 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(9)),
                                      self.board.get_pin('d:{}:o'.format(8)),
