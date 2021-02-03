@@ -2,7 +2,6 @@
 Manager file for the steerable needle.
 """
 import time
-import threading
 import multiprocessing
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
@@ -112,20 +111,15 @@ class Needle:
         input_method = Controller()
         image_acquisition = ImageAcquisition(args.fps, args.camtop, args.camfront, args.nofeed)
 
-        # Queues allow for communication between threads. LIFO means the most recent image/input will be used
+        # Queues allow for communication between threads/processes. LIFO means the most recent image/input will be used
         input_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads controller input
         needle_pos_feed = multiprocessing.Queue(maxsize=0) # Create Queue for communication of needle tip pos/ori
 
-        # Create and start Process for Image Acq/Proc and Thread for Input Listening
+        # Create and start Process for Image Acq/Proc
         process_1 = multiprocessing.Process(target=image_acquisition.retrieve_current_image, args=(needle_pos_feed, ))
         process_1.name = "ImageAcquiProc_process"
-        thread_1 = threading.Thread(target=input_method.get_direction_from_keyboard, args=(input_feed, ))
-        thread_1.name = "KeyboardListener_thread"
 
-        process_1.start()
-        thread_1.start()
-
-        # Start pygame to allow controller inputs
+        # Start pygame to allow controller and keyboard inputs
         pygame.init()
 
         logger.success("Ready to receive inputs.\n")
@@ -167,7 +161,8 @@ class Needle:
                 self.initial_position()
             else:
                 logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
-                # self.move_to_dir_sync(direction)
+                self.move_to_dir_sync(direction)
+                logger.success("\nReady to receive inputs.\n")
 
 
         # Neatly exiting main program loop
@@ -177,7 +172,6 @@ class Needle:
 
         process_1.terminate()
         process_1.join()
-        thread_1.join()
         print("Finished Program Execution.")
 
     def move_freely(self):
@@ -185,22 +179,38 @@ class Needle:
         Handler for needle movement
         """
         input_method = Controller()
+        input_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads controller input
 
         while True:
-            dirOutput = input_method.get_direction()
+            # Retrieve user inputs
+            events = pygame.event.get()
+            input_method.get_direction_from_pygame_events(input_feed, events)
 
-            # Check if faulty input and try again
-            while dirOutput.direction == -1:
-                time.sleep(0.5) # Sleep to make sure button is unpressed
-                dirOutput = input_method.get_direction()
+            dir_output = None
 
-            # Move the needle:
-            if dirOutput.direction == 100:
-                logger.success("Init called: moving to zero then to 200 steps")
-                self.initial_position()
-            else:
-                logger.success("Moving to : {}".format(input_method.dir_to_text(dirOutput.direction)))
-                self.move_to_dir_sync(dirOutput)
+            if not input_feed.empty(): # An input was entered
+                dir_output = input_feed.get()
+
+                # Sentinel value was put in Queue, exit program
+                if dir_output is None:
+                    break
+
+                if dir_output.direction == -1:
+                    time.sleep(0.5) # Sleep to make sure button is unpressed
+                    continue
+
+                # Move the needle:
+                if dir_output.direction == 100:
+                    logger.success("Init called: moving to zero then to 200 steps")
+                    self.initial_position()
+                else:
+                    logger.success("Moving to : {}".format(input_method.dir_to_text(dir_output.direction)))
+                    self.move_to_dir_sync(dir_output)
+                    logger.success("\nReady to receive inputs.\n")
+
+        # Neatly exiting main program loop
+        pygame.quit()
+        input_method.is_running = False
 
     def move_to_dir(self, gdo):
         """
@@ -298,7 +308,7 @@ class Needle:
             # setting stepcounters to current positions
             self.motors[motorpull[0]].set_count(-1*sx)
             self.motors[motorpush[0]].set_count(sx)
-        print('\nNEEDLE->move_to_dir_sync: Movement finished.')
+        print('\nNEEDLE->move_to_dir_sync: Movement finished. Step count after movement : ')
         self.motors[0].get_count()
         self.motors[1].get_count()
         self.motors[2].get_count()

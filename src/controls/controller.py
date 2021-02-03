@@ -10,7 +10,6 @@ import time
 from queue import LifoQueue
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
-import keyboard
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import src.util.logger as logger
 
@@ -61,12 +60,12 @@ class Controller:
             self.joystick.init()
             logger.success("Controller connected : " + self.joystick.get_name())
             logger.info(
-                "While holding the left stick pointed towards a direction, press the A button to confirm your choice.")
+                "While holding the left stick pointed towards a direction, press the A button to confirm your choice.\n")
         else:
             logger.info("A Keyboard is connected.")
             logger.info(
-                "While pressing the arrowkeys to a desired direction" +
-                "press the Return (Enter) Key to confirm your choice.")
+                "While pressing the arrowkeys to a desired direction, " +
+                "press the Return (Enter) Key to confirm your choice.\n")
 
     def get_direction_from_pygame_events(self, input_feed, events):
         """
@@ -79,78 +78,21 @@ class Controller:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.is_running = False
                 input_feed.put(None) # Sentinel Value
+
             # Pygame ArrowKey Handler
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 up_arrow = pressed[pygame.K_UP]
                 down_arrow = pressed[pygame.K_DOWN]
                 left_arrow = pressed[pygame.K_LEFT]
                 right_arrow = pressed[pygame.K_RIGHT]
-
                 input_feed.put(Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100]))
+                time.sleep(0.1) # Make sure only one input is registered
 
             # Joysyick controls
             if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
                 input_feed.put(self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
                 input_feed.put(Output(100, [100, 100]))
-
-    def get_direction_from_keyboard(self, input_feed: LifoQueue):
-        """
-        Function built for a THREAD. Listens to the keyboard during program execution, and adds inputs to a Queue.
-        """
-        while self.is_running:
-            # Input recorded by keyboard module
-            if keyboard.is_pressed('return'):
-                up_arrow = keyboard.is_pressed('up')
-                down_arrow = keyboard.is_pressed('down')
-                left_arrow = keyboard.is_pressed('left')
-                right_arrow = keyboard.is_pressed('right')
-                input_feed.put(Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100]))
-                time.sleep(0.5)
-
-
-    def get_direction(self):
-        """
-        Get direction from input
-        """
-        pygame.init()
-
-        # Check input method
-        self.get_input_method()
-        logger.info("\nSpecify a direction for needle movement : ")
-
-        run = True
-        while run:
-
-            # Input recorded by keyboard module
-            if keyboard.is_pressed('return'):
-                up_arrow = keyboard.is_pressed('up')
-                down_arrow = keyboard.is_pressed('down')
-                left_arrow = keyboard.is_pressed('left')
-                right_arrow = keyboard.is_pressed('right')
-                return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
-
-            # Input recorded by pygame
-            pressed = pygame.key.get_pressed()
-            events = pygame.event.get()
-
-            for event in events:
-                # End loop when escape is pressed
-                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                    sys.exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                    up_arrow = pressed[pygame.K_UP]
-                    down_arrow = pressed[pygame.K_DOWN]
-                    left_arrow = pressed[pygame.K_LEFT]
-                    right_arrow = pressed[pygame.K_RIGHT]
-
-                    return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
-
-                if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
-                    return self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1)
-                if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
-                    return Output(100, [100, 100])
-
 
     @staticmethod
     # pylint: disable=too-many-return-statements
