@@ -22,11 +22,12 @@ class Motor:
                     "    Initial stepcount: {}\n".format(self.stepcounter))
 
 
-    def get_count(self) ->int:
+    def get_count(self, report=0) ->int:
         """
         Getter for self.stepcounter
         """
-        print(str(self.index) + "STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
+        if report == 1:
+            print(str(self.index) + " STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
         return self.stepcounter
 
     def set_count(self, steps_done):
@@ -34,17 +35,17 @@ class Motor:
         Setter for self.stepcounter
         """
         self.stepcounter = self.stepcounter + steps_done
-        print(str(self.index) + "STEPPER_MOTOR.py: stepcounter = ", self.stepcounter)
+        print(str(self.index) + " STEPPER_MOTOR.py: new stepcount = ", self.stepcounter)
 
 
 
     def run_forward(self, runsteps):
         """
-        Moves this motor forwards by runsteps ammount
+        Moves this motor forwards by runsteps amount
         """
         self.dirpin.write(1)
-        if self.stepcounter + runsteps  > 200:
-            print("STEPPER_MOTOR.py--> run_forward:    Steps make stepcounter exceed upperlimit (200)")
+        if self.stepcounter + runsteps > 400:
+            print("STEPPER_MOTOR.py->run_forward:    Steps make stepcounter exceed upper limit (400)")
         else:
             for _ in range(runsteps):
                 self.movpin.write(1)
@@ -52,16 +53,16 @@ class Motor:
                 self.movpin.write(0)
                 time.sleep(0.01)
             self.stepcounter = self.stepcounter + runsteps
-            print(str(self.index) + "STEPPER_MOTOR.py--> run_forward: Current stepcount is: ", self.stepcounter)
+            print(str(self.index) + " STEPPER_MOTOR.py->run_forward: Current stepcount is: ", self.stepcounter)
 
 
     def run_backward(self, runsteps):
         """
-        Moves this motor backwards by runsteps ammount
+        Moves this motor backwards by runsteps amount
         """
         self.dirpin.write(0)
         if self.stepcounter - runsteps < 0:
-            print("STEPPER_MOTOR.py--> run_backward:    Steps reduce stepcounter under lowerlimit (0)")
+            print("STEPPER_MOTOR.py->run_backward:    Steps reduce stepcounter under lower limit (0)")
         else:
             for _ in range(runsteps):
                 self.movpin.write(1)
@@ -69,4 +70,4 @@ class Motor:
                 self.movpin.write(0)
                 time.sleep(0.01)
             self.stepcounter = self.stepcounter - runsteps
-            print(str(self.index) + "STEPPER_MOTOR.py--> run_backward: Current stepcount is: ", self.stepcounter)
+            print(str(self.index) + " STEPPER_MOTOR.py--> run_backward: Current stepcount is: ", self.stepcounter)

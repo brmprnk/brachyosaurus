@@ -38,6 +38,7 @@ class Output:
         self.direction = direction
         self.stepsx = stepsout[0]
         self.stepsy = stepsout[1]
+        self.stepsout = stepsout
 
 class Controller:
     """
@@ -138,21 +139,24 @@ class Controller:
             return Output(Direction.NULL.value, [0, 0])
 
         # xy_coords to steps to output per x or y motors
-        x_steps = round(abs_x*100)
-        y_steps = round(abs_y*100)
+        x_steps = round(x_coord*100)
+        y_steps = round(y_coord*100)
         stepsout = [x_steps, y_steps]
-        print('CONTROLLER: stepsout = ', stepsout)
 
-        if x_coord > 0:
+        if abs_y > abs_x:
             if y_coord > 0:
-                return Output(Direction.upright.value, stepsout)
+                print("CONTROLLER:      up direction cone, stepsout = ", stepsout)
+                return Output(Direction.up.value, stepsout)
             if y_coord < 0:
-                return Output(Direction.downright.value, stepsout)
-        if x_coord < 0:
-            if y_coord < 0:
-                return Output(Direction.downleft.value, stepsout)
-            if y_coord > 0:
-                return Output(Direction.upleft.value, stepsout)
+                print("CONTROLLER:      down direction cone, stepsout = ", stepsout)
+                return Output(Direction.down.value, stepsout)
+        else:
+            if x_coord > 0:
+                print("CONTROLLER:      right direction cone, stepsout = ", stepsout)
+                return Output(Direction.right.value, stepsout)
+            if x_coord < 0:
+                print("CONTROLLER:      left direction cone, stepsout = ", stepsout)
+                return Output(Direction.left.value, stepsout)
 
     @classmethod
     def dir_to_text(cls, direction) -> str:

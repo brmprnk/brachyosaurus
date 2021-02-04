@@ -66,7 +66,7 @@ PARSER.add_argument("--comport", type=str, default="COM5", action="store",
                     help="The comport on which the Arduino is connected")
 PARSER.add_argument("--startsteps", type=str, default="200", action="store",
                     help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
-PARSER.add_argument("--sensitivity", type=str, default="0.5", action="store",
+PARSER.add_argument("--sensitivity", type=str, default="0.1", action="store",
                     help="The sensitivity of the needle controls (between 0 and 1) ")
 PARSER.add_argument("--fps", action="store", type=int, default=1,
                     help="The number of times (per second) the module should check for its position using camera's")
@@ -90,7 +90,7 @@ PARSER_NEEDLE.add_argument("--comport", type=str, default="COM5", action="store"
                            help="The comport on which the Arduino is connected")
 PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="store",
                            help="The amount of steps (max 400) performed forwards after the Crouzets are INIT at zero ")
-PARSER_NEEDLE.add_argument("--sensitivity", type=str, default="1", action="store",
+PARSER_NEEDLE.add_argument("--sensitivity", type=str, default="0.1", action="store",
                            help="The sensitivity of the needle controls (between 0 and 1) ")
 
 # Parser for the IMAGEPROC command with all the options

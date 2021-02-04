@@ -9,6 +9,7 @@ from queue import LifoQueue
 import argparse
 import pyfirmata
 import pygame
+import numpy as np
 
 from src.controls import stepper_motor
 from src.controls.controller import Controller
@@ -56,6 +57,14 @@ class Needle:
             7: [3],
         }
 
+        # motor vectors that code for the directions in the x-y space of the needle
+        self.motorvec = {
+            0: np.array([1, 1]),
+            1: np.array([-1, 1]),
+            2: np.array([-1, -1]),
+            3: np.array([1, -1]),
+        }
+
     def default_motor_setup(self):
         """
         Initializes default motor to Arduino board configuration
@@ -92,7 +101,7 @@ class Needle:
     def automated_brachy_therapy(self, args) -> None:
         """
         Handler for AUTOMATED Brachy Therapy.
-        Can handle two camera's, and also allows for manual inputs to overwrite aoutomated commands.
+        Can handle two camera's, and also allows for manual inputs to overwrite automated commands.
         """
         # Enter code here
 
@@ -157,7 +166,7 @@ class Needle:
 
             # Move the needle:
             if direction.direction == 100:
-                logger.success("Init called: moving to zero then to 200 steps")
+                logger.success("Init called: moving to midpoint then to zero")
                 self.initial_position()
             else:
                 logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
@@ -199,50 +208,154 @@ class Needle:
                     time.sleep(0.5) # Sleep to make sure button is unpressed
                     continue
 
+
                 # Move the needle:
                 if dir_output.direction == 100:
-                    logger.success("Init called: moving to zero then to 200 steps")
+                    logger.success("Init called: moving to midpoint then to zero")
                     self.initial_position()
                 else:
                     logger.success("Moving to : {}".format(input_method.dir_to_text(dir_output.direction)))
-                    self.move_to_dir_sync(dir_output)
+                    self.move_to_dir_syncv2(dir_output)
                     logger.success("\nReady to receive inputs.\n")
 
         # Neatly exiting main program loop
         pygame.quit()
         input_method.is_running = False
 
-    def move_to_dir(self, gdo):
+    def move_to_dir_syncv2(self, gdo):
         """
-        Krijg een richting --> Stuur de motors
-        gdo = get direction output (an object of the class Output)
+        Receive direction (gdo) --> Drive needle with motors synchronously
+        1) Find A and B such that gdo.stepsout = (stepsx, stepsy) = A(motor_u) + B(motor_Z)
+            (linear combination of 2 motor vectors to reach gdo.stepsout vector)
+        2a) view the push option (corresponds with run_forward() method) ELSE do 2b)
+        2b) view the pull option (corresponds with run_backward() method ELSE do *)
+        *) return error in case both options do not work
+
+        gdo = get direction output (an object of the class Output(direction, stepsout) )
         """
 
-        sx = round(self.sensitivity*gdo.stepsx)
-        sy = round(self.sensitivity*gdo.stepsy)
-        motorpull = self.dirpull[gdo.direction]
-        motorpush = self.dirpush[gdo.direction]
-        # run the motors, if motorpull is length 2 than so is motorpush, otherwise run only one axis (keyboard only)
-        if len(motorpull) > 1:
-            self.motors[motorpull[0]].run_backward(sx)
-            self.motors[motorpull[1]].run_backward(sy)
-            self.motors[motorpush[0]].run_forward(sx)
-            self.motors[motorpush[1]].run_forward(sy)
+        # 1) if push available then find the steps for motorpush0 and motorpush1
+        motor_matrix_push = []
+        for n in self.dirpush[gdo.direction]:
+            motor_matrix_push.append(self.motorvec[n])
+        a = np.array(motor_matrix_push, dtype=int)
+        b = np.array([int(gdo.stepsout[0]*self.sensitivity), int(gdo.stepsout[1]*self.sensitivity)], dtype=int)
+        x = np.linalg.solve(a.transpose(), b)
+        big_a = int(abs(x[0]))
+        big_b = int(abs(x[1]))
+        print("NEEDLE->move_syncV2: PUSH system of equations: \n"
+              "|     a = " + str(a.transpose()[0]) + "\n"
+              "|         " + str(a.transpose()[1]) + "\n"
+              "|     b = " + str(b) + "\n"
+              "|     [big_a, big_b] = " + str([big_a, big_b]) + "\n")
+
+        motorpush0 = self.dirpush[gdo.direction][0]
+        motorpush1 = self.dirpush[gdo.direction][1]
+        print("|     motorpush0 = " + str(motorpush0) + " motorpush1 = " + str(motorpush1))
+
+        # can we push? IF yes ==> then push ELSE continue to pull
+        if self.motors[motorpush0].get_count() + abs(big_a) <= 400 and self.motors[motorpush1].get_count() + abs(big_b) <= 400:
+            print("NEEDLE->move_syncV2: PUSH available, starting...")
+            if big_b > big_a:
+                if big_a == 0: # removing division by zero error
+                    big_a = 1
+                ratio = int(big_b/big_a)
+                print(" mod ratio = ", ratio)
+                for i in range(big_a + big_b):
+                    if i % (ratio+1) == 0 and i != 0:
+                        print("big_a at i = ", i)
+                        self.motors[motorpush0].run_forward(1)
+                    else:
+                        self.motors[motorpush1].run_forward(1)
+            else:
+                if big_b == 0:
+                    big_b = 1
+                ratio = int(big_a/big_b)
+                print(" mod ratio = ", ratio)
+                for i in range(big_a + big_b):
+                    if i % (ratio+1) == 0 and i != 0:
+                        print("big_b at i = ", i)
+                        self.motors[motorpush1].run_forward(1)
+                    else:
+                        self.motors[motorpush0].run_forward(1)
+            return 0
+
+        print("\nNEEDLE->move_syncV2: PUSH not available, trying PULL")
+        # 2) if pull available then find the steps for motorpull0 and motorpull1
+        motor_matrix_pull = []
+        for n in self.dirpull[gdo.direction]:
+            motor_matrix_pull.append(self.motorvec[n])
+        a = np.array(motor_matrix_pull, dtype=int)
+        b = np.array([int(gdo.stepsout[0]*self.sensitivity), int(gdo.stepsout[1]*self.sensitivity)], dtype=int)
+        x = np.linalg.solve(a.transpose(), b)
+        big_a = int(abs(x[0]))
+        big_b = int(abs(x[1]))
+        print("NEEDLE->move_syncV2: PULL system of equations: \n"
+              "|     a = " + str(a.transpose()[0]) + "\n"
+              "|         " + str(a.transpose()[1]) + "\n"
+              "|     b = " + str(b) + "\n"
+              "|     [big_a, big_b] = " + str([big_a, big_b]) + "\n")
+
+        motorpull0 = self.dirpull[gdo.direction][0]
+        motorpull1 = self.dirpull[gdo.direction][1]
+        print("|     motorpull0 = " + str(motorpull0) + " motorpull1 = " + str(motorpull1))
+
+        # can we pull? IF yes ==> then pull ELSE report the movement requested is not possible
+        if self.motors[motorpull0].get_count() - abs(big_a) >= 0 and self.motors[motorpull1].get_count() - abs(big_b) >= 0:
+            print("NEEDLE->move_syncV2: PULL available, starting...")
+            if big_b > big_a:
+                if big_a == 0: # removing division by zero error
+                    big_a = 1
+                ratio = int(big_b/big_a)
+                print(" mod ratio = ", ratio)
+                for i in range(big_a + big_b):
+                    if i % (ratio+1) == 0 and i != 0:
+                        print("big_a at i = ", i)
+                        self.motors[motorpull0].run_backward(1)
+                    else:
+                        self.motors[motorpull1].run_backward(1)
+            else:
+                if big_b == 0:
+                    big_b = 1
+                ratio = int(big_a/big_b)
+                print(" mod ratio = ", ratio)
+                for i in range(big_a + big_b):
+                    if i % (ratio+1) == 0 and i != 0:
+                        print("big_b at i = ", i)
+                        self.motors[motorpull1].run_backward(1)
+                    else:
+                        self.motors[motorpull0].run_backward(1)
+            return 0
         else:
-            self.motors[motorpull[0]].run_backward(sx)      # steps for one axis is always 100 in x and y
-            self.motors[motorpush[0]].run_forward(sx)
+            logger.error("\n NEEDLE->move_syncV2: neither PUSH nor PULL available; no movement of needle occurred")
+
 
     def initial_position(self):
         """
-        Stuur de motoren terug naar 200
+        Send motors back to zero
         """
+        currentpos = []
         for motor_i in range(len(self.motors)):
             position = self.motors[motor_i].get_count()
-            steps_diff = abs(200 - position)
-            if position > 200:
-                self.motors[motor_i].run_backward(steps_diff)
+            currentpos = currentpos + [position]
+
+        midpoint = int((max(currentpos) + min(currentpos))/2)
+
+        # return to midpoint individually
+        print('\nNEEDLE->initial_position: starting to move to midpoint...  midpoint =', midpoint)
+        for motor_i in range(len(self.motors)):
+            if currentpos[motor_i] > midpoint:
+                self.motors[motor_i].run_backward(currentpos[motor_i] - midpoint)
             else:
-                self.motors[motor_i].run_forward(steps_diff)
+                self.motors[motor_i].run_forward(midpoint - currentpos[motor_i])
+
+        # all return simultaneously to zero
+        print('\nNEEDLE->initial_position: starting to move to zero...')
+        for _ in range(midpoint):
+            for motor_i in range(len(self.motors)):
+                self.motors[motor_i].run_backward(1)
+
+        print("\nReady to receive input again")
 
     def move_to_dir_sync(self, gdo):
         """
