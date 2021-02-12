@@ -39,7 +39,7 @@ class Motor:
 
 
 
-    def run_forward(self, runsteps):
+    def run_forward(self, runsteps, report=0):
         """
         Moves this motor forwards by runsteps amount
         """
@@ -53,10 +53,11 @@ class Motor:
                 self.movpin.write(0)
                 time.sleep(0.01)
             self.stepcounter = self.stepcounter + runsteps
-            print(str(self.index) + " STEPPER_MOTOR.py->run_forward: Current stepcount is: ", self.stepcounter)
+            if report == 1:
+                print(str(self.index) + " STEPPER_MOTOR.py->run_forward: Current stepcount is: ", self.stepcounter)
 
 
-    def run_backward(self, runsteps):
+    def run_backward(self, runsteps, report=0):
         """
         Moves this motor backwards by runsteps amount
         """
@@ -70,4 +71,5 @@ class Motor:
                 self.movpin.write(0)
                 time.sleep(0.01)
             self.stepcounter = self.stepcounter - runsteps
-            print(str(self.index) + " STEPPER_MOTOR.py--> run_backward: Current stepcount is: ", self.stepcounter)
+            if report == 1:
+                print(str(self.index) + " STEPPER_MOTOR.py--> run_backward: Current stepcount is: ", self.stepcounter)

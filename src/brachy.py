@@ -62,7 +62,7 @@ PARSER_IMAGEPROC = SUBPARSERS.add_parser("IMAGEPROC", help="Test the image proce
 PARSER.add_argument("-init", action="store_true", help="Initializes Crouzet Stepper Motor positions.")
 PARSER.add_argument("-manual", action="store_true", default=True,
                     help="Determines control mode. Automatic is the default.")
-PARSER.add_argument("--comport", type=str, default="COM5", action="store",
+PARSER.add_argument("--comport", type=str, default="COM4", action="store",
                     help="The comport on which the Arduino is connected")
 PARSER.add_argument("--startsteps", type=str, default="200", action="store",
                     help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
@@ -86,7 +86,7 @@ PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
 
 # Parser for the NEEDLE command with all the options
 PARSER_NEEDLE.add_argument("-init", action="store_true", help= "INITs Crouzet positions")
-PARSER_NEEDLE.add_argument("--comport", type=str, default="COM5", action="store",
+PARSER_NEEDLE.add_argument("--comport", type=str, default="COM4", action="store",
                            help="The comport on which the Arduino is connected")
 PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="store",
                            help="The amount of steps (max 400) performed forwards after the Crouzets are INIT at zero ")
@@ -149,11 +149,11 @@ def needle_movement(args: argparse.Namespace) -> None:
     """
     Handler for main purpose of program
     """
+    # Create Needle object
+    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
     if args.init:
-        reset_arduino(args.comport, args.startsteps)
+        board_controller.initial_position()
     else:
-        # Create Needle object
-        board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
         # Call its movement function
         board_controller.move_freely()
 
@@ -163,7 +163,9 @@ def linear_stage(args: argparse.Namespace) -> None:
     """
     Handler for controlling the linear stage
     """
-    # lin_move.move_to_pos(args.initpos, args.targetpos, args.speed)
+    # Create Needle object
+    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
+    board_controller.festo_move(args.targetpos, args.speed)
 
 
 def image_proc(args: argparse.Namespace) -> None:
