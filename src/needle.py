@@ -26,14 +26,17 @@ class Needle:
     Functions as a manager for the program, always knows what is the status of needle controlling parts.
     """
 
-    def __init__(self, comport_arduino, startsteps, sensitivity):
-
+    def __init__(self, comport_arduino, startsteps, sensitivity, invertx: bool):
+        # Handle input parameters
         self.port = comport_arduino
         self.startcount = startsteps
         self.sensitivity = float(sensitivity)
         if self.sensitivity > 1:
             self.sensitivity = 0.5
             logger.info("Invalid sensitivity entered: new value = {}".format(self.sensitivity))
+        self.invert_x_axis = invertx
+
+        # Setup Arduino and Stepper Motors
         self.board = pyfirmata.Arduino(self.port)
         time.sleep(1)
         self.motors = []
@@ -171,7 +174,7 @@ class Needle:
         None
         """
         # Create Class instances of controller and image acquisition
-        input_method = Controller()
+        input_method = Controller(self.invert_x_axis)
         image_acquisition = ImageAcquisition(args.fps, args.camtop, args.camfront, args.nofeed)
 
         # Queues allow for communication between threads/processes. LIFO means the most recent image/input will be used
@@ -244,7 +247,7 @@ class Needle:
         """
         Handler for needle movement
         """
-        input_method = Controller()
+        input_method = Controller(self.invert_x_axis)
         input_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads controller input
 
         while True:

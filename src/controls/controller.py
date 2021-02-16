@@ -48,12 +48,13 @@ class Controller:
     """
     Class that encapsulates receiving inputs and returning directions.
     """
-    def __init__(self) -> None:
+    def __init__(self, invertx: bool) -> None:
         self.deadzone = 0.2
         self.diagonal_margin = 0.4
         self.joystick = None
         self.is_running = True
         self.get_input_method()
+        self.invert_x_axis = invertx
 
     def get_input_method(self) -> None:
         """
@@ -161,10 +162,14 @@ class Controller:
         else:
             if x_coord > 0:
                 print("CONTROLLER:      right direction cone, stepsout = ", stepsout)
-                return Output(Direction.right.value, stepsout)
+                if self.invert_x_axis:
+                    return Output(Direction.right.value, stepsout)
+                return Output(Direction.left.value, stepsout)
             if x_coord < 0:
                 print("CONTROLLER:      left direction cone, stepsout = ", stepsout)
-                return Output(Direction.left.value, stepsout)
+                if self.invert_x_axis:
+                    return Output(Direction.left.value, stepsout)
+                return Output(Direction.right.value, stepsout)
 
     @classmethod
     def dir_to_text(cls, direction) -> str:

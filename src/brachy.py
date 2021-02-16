@@ -86,12 +86,15 @@ PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
 
 # Parser for the NEEDLE command with all the options
 PARSER_NEEDLE.add_argument("-init", action="store_true", help= "INITs Crouzet positions")
+PARSER_NEEDLE.add_argument("-invertx", action="store_true",
+                           help="Invert x-axis values. Akin to switching between front and posterior perspective.")
 PARSER_NEEDLE.add_argument("--comport", type=str, default="COM4", action="store",
                            help="The comport on which the Arduino is connected")
 PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="store",
                            help="The amount of steps (max 400) performed forwards after the Crouzets are INIT at zero ")
 PARSER_NEEDLE.add_argument("--sensitivity", type=str, default="0.1", action="store",
                            help="The sensitivity of the needle controls (between 0 and 1) ")
+
 
 # Parser for the IMAGEPROC command with all the options
 PARSER_IMAGEPROC.add_argument("--configpath", type=str, default="config.ini", action="store",
@@ -136,7 +139,7 @@ def brachy_therapy(args: argparse.Namespace) -> None:
         logger.success("Starting Brachy Therapy.\n")
 
         # Create Needle object
-        board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
+        board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity, args.invertx)
         # Call its movement function
         if args.manual:
             logger.info("Input type is MANUAL.")
@@ -150,7 +153,7 @@ def needle_movement(args: argparse.Namespace) -> None:
     Handler for main purpose of program
     """
     # Create Needle object
-    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
+    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity, args.invertx)
     if args.init:
         board_controller.initial_position()
     else:
@@ -164,7 +167,7 @@ def linear_stage(args: argparse.Namespace) -> None:
     Handler for controlling the linear stage
     """
     # Create Needle object
-    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity)
+    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity, args.invertx)
     board_controller.festo_move(args.targetpos, args.speed)
 
 
