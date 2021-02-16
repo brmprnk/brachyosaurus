@@ -96,7 +96,7 @@ class Controller:
 
             # Joystick controls
             if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
-                input_feed.put(self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1))
+                input_feed.put(self.analog_stick_to_dir(self.joystick.get_axis(0) * -1, self.joystick.get_axis(1) * -1))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
                 input_feed.put(Output(100, [100, 100]))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 4:
@@ -136,6 +136,9 @@ class Controller:
         Maps the (x, y) coordinate of the analog stick to 100 different amplitudes
         and 360 different angles (degrees) ;
         """
+        if self.invert_x_axis:
+            x_coord *= -1
+
         abs_x = abs(x_coord)
         abs_y = abs(y_coord)
 
@@ -162,14 +165,14 @@ class Controller:
         else:
             if x_coord > 0:
                 print("CONTROLLER:      right direction cone, stepsout = ", stepsout)
-                if self.invert_x_axis:
-                    return Output(Direction.right.value, stepsout)
-                return Output(Direction.left.value, stepsout)
+                # if self.invert_x_axis:
+                #     return Output(Direction.right.value, stepsout)
+                return Output(Direction.right.value, stepsout)
             if x_coord < 0:
                 print("CONTROLLER:      left direction cone, stepsout = ", stepsout)
-                if self.invert_x_axis:
-                    return Output(Direction.left.value, stepsout)
-                return Output(Direction.right.value, stepsout)
+                # if self.invert_x_axis:
+                #     return Output(Direction.left.value, stepsout)
+                return Output(Direction.left.value, stepsout)
 
     @classmethod
     def dir_to_text(cls, direction) -> str:
