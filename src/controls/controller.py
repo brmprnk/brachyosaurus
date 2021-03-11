@@ -10,7 +10,6 @@ import time
 from queue import LifoQueue
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
-import keyboard
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import src.util.logger as logger
 
@@ -28,28 +27,34 @@ class Direction(Enum):
     downleft = 5
     left = 6
     upleft = 7
+    init = 100
+    festo_backward = 200
+    festo_forward = 201
 
 # pylint: disable=too-few-public-methods
 class Output:
     """
     Class that encapsulates the result of a Controller press.
     A user input should have a direction, but it needs to incorporate how far it should move.
+    Used in other files and referred to as Get Direction Output (GDO).
     """
     def __init__(self, direction, stepsout):
         self.direction = direction
         self.stepsx = stepsout[0]
         self.stepsy = stepsout[1]
+        self.stepsout = stepsout
 
 class Controller:
     """
     Class that encapsulates receiving inputs and returning directions.
     """
-    def __init__(self) -> None:
+    def __init__(self, invertx: bool) -> None:
         self.deadzone = 0.2
         self.diagonal_margin = 0.4
         self.joystick = None
         self.is_running = True
         self.get_input_method()
+        self.invert_x_axis = invertx
 
     def get_input_method(self) -> None:
         """
@@ -61,12 +66,12 @@ class Controller:
             self.joystick.init()
             logger.success("Controller connected : " + self.joystick.get_name())
             logger.info(
-                "While holding the left stick pointed towards a direction, press the A button to confirm your choice.")
+                "While holding the left stick pointed towards a direction, press the A button to confirm your choice.\n")
         else:
             logger.info("A Keyboard is connected.")
             logger.info(
-                "While pressing the arrowkeys to a desired direction" +
-                "press the Return (Enter) Key to confirm your choice.")
+                "While pressing the arrowkeys to a desired direction, " +
+                "press the Return (Enter) Key to confirm your choice.\n")
 
     def get_direction_from_pygame_events(self, input_feed, events):
         """
@@ -79,78 +84,25 @@ class Controller:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.is_running = False
                 input_feed.put(None) # Sentinel Value
+
             # Pygame ArrowKey Handler
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 up_arrow = pressed[pygame.K_UP]
                 down_arrow = pressed[pygame.K_DOWN]
                 left_arrow = pressed[pygame.K_LEFT]
                 right_arrow = pressed[pygame.K_RIGHT]
-
                 input_feed.put(Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100]))
+                time.sleep(0.1) # Make sure only one input is registered
 
-            # Joysyick controls
+            # Joystick controls
             if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
-                input_feed.put(self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1))
+                input_feed.put(self.analog_stick_to_dir(self.joystick.get_axis(0) * -1, self.joystick.get_axis(1) * -1))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
                 input_feed.put(Output(100, [100, 100]))
-
-    def get_direction_from_keyboard(self, input_feed: LifoQueue):
-        """
-        Function built for a THREAD. Listens to the keyboard during program execution, and adds inputs to a Queue.
-        """
-        while self.is_running:
-            # Input recorded by keyboard module
-            if keyboard.is_pressed('return'):
-                up_arrow = keyboard.is_pressed('up')
-                down_arrow = keyboard.is_pressed('down')
-                left_arrow = keyboard.is_pressed('left')
-                right_arrow = keyboard.is_pressed('right')
-                input_feed.put(Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100]))
-                time.sleep(0.5)
-
-
-    def get_direction(self):
-        """
-        Get direction from input
-        """
-        pygame.init()
-
-        # Check input method
-        self.get_input_method()
-        logger.info("\nSpecify a direction for needle movement : ")
-
-        run = True
-        while run:
-
-            # Input recorded by keyboard module
-            if keyboard.is_pressed('return'):
-                up_arrow = keyboard.is_pressed('up')
-                down_arrow = keyboard.is_pressed('down')
-                left_arrow = keyboard.is_pressed('left')
-                right_arrow = keyboard.is_pressed('right')
-                return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
-
-            # Input recorded by pygame
-            pressed = pygame.key.get_pressed()
-            events = pygame.event.get()
-
-            for event in events:
-                # End loop when escape is pressed
-                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                    sys.exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                    up_arrow = pressed[pygame.K_UP]
-                    down_arrow = pressed[pygame.K_DOWN]
-                    left_arrow = pressed[pygame.K_LEFT]
-                    right_arrow = pressed[pygame.K_RIGHT]
-
-                    return Output(self.arrowkeys_to_dir(up_arrow, down_arrow, left_arrow, right_arrow), [100, 100])
-
-                if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
-                    return self.analog_stick_to_dir(self.joystick.get_axis(0), self.joystick.get_axis(1) * -1)
-                if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
-                    return Output(100, [100, 100])
-
+            if event.type == pygame.JOYBUTTONDOWN and event.button == 4:
+                input_feed.put(Output(200, [1, 1]))
+            if event.type == pygame.JOYBUTTONDOWN and event.button == 5:
+                input_feed.put(Output(201, [1, 1]))
 
     @staticmethod
     # pylint: disable=too-many-return-statements
@@ -184,6 +136,9 @@ class Controller:
         Maps the (x, y) coordinate of the analog stick to 100 different amplitudes
         and 360 different angles (degrees) ;
         """
+        if self.invert_x_axis:
+            x_coord *= -1
+
         abs_x = abs(x_coord)
         abs_y = abs(y_coord)
 
@@ -196,21 +151,28 @@ class Controller:
             return Output(Direction.NULL.value, [0, 0])
 
         # xy_coords to steps to output per x or y motors
-        x_steps = round(abs_x*100)
-        y_steps = round(abs_y*100)
+        x_steps = round(x_coord*100)
+        y_steps = round(y_coord*100)
         stepsout = [x_steps, y_steps]
-        print('CONTROLLER: stepsout = ', stepsout)
 
-        if x_coord > 0:
+        if abs_y > abs_x:
             if y_coord > 0:
-                return Output(Direction.upright.value, stepsout)
+                print("CONTROLLER:      up direction cone, stepsout = ", stepsout)
+                return Output(Direction.up.value, stepsout)
             if y_coord < 0:
-                return Output(Direction.downright.value, stepsout)
-        if x_coord < 0:
-            if y_coord < 0:
-                return Output(Direction.downleft.value, stepsout)
-            if y_coord > 0:
-                return Output(Direction.upleft.value, stepsout)
+                print("CONTROLLER:      down direction cone, stepsout = ", stepsout)
+                return Output(Direction.down.value, stepsout)
+        else:
+            if x_coord > 0:
+                print("CONTROLLER:      right direction cone, stepsout = ", stepsout)
+                # if self.invert_x_axis:
+                #     return Output(Direction.right.value, stepsout)
+                return Output(Direction.right.value, stepsout)
+            if x_coord < 0:
+                print("CONTROLLER:      left direction cone, stepsout = ", stepsout)
+                # if self.invert_x_axis:
+                #     return Output(Direction.left.value, stepsout)
+                return Output(Direction.left.value, stepsout)
 
     @classmethod
     def dir_to_text(cls, direction) -> str:

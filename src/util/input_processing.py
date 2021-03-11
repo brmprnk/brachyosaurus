@@ -11,8 +11,6 @@ def input_log(parser: argparse.Namespace) -> None:
     :param parser:   argparse.Namespace  The parser containing all program arguments.
     :return: None
     """
-    if parser.subparse is None:
-        return
     result = "\n"
     result += general_information(parser)
     result += extra_arguments(parser)
@@ -25,6 +23,8 @@ def general_information(parser: argparse.Namespace) -> str:
     :param parser:  argparse.Namespace  The parser with program arguments.
     :return:        str    ()             General information represented as a string.
     """
+
+
     # FESTO.
     if parser.subparse == "FESTO":
         result = "Running FESTO -> Solely controlling the FESTO Linear Stage"
@@ -35,9 +35,9 @@ def general_information(parser: argparse.Namespace) -> str:
         if parser.init:
             result += "\n The init module is called. Resetting all motors to their start positions..."
  
-    # FESTO & NEEDLE
+    # BRACHY THERAPY
     else:
-        result = ""
+        result = "Running Brachy Therapy -> A video feed will be opened and the FESTO Module and Needle will be controlled. "
 
     return result
 
@@ -76,5 +76,6 @@ def extra_arguments(parser: argparse.Namespace) -> str:
     # FESTO & NEEDLE
     else:
         result = ""
+        result += "\nConnecting to Arduino Board at COM port : " + parser.comport
 
     return "\n" + result
