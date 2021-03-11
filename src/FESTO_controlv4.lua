@@ -9,8 +9,8 @@
 --]]
 
 --_______TESTING_____________
-MB.W(46002,3,8)
-MB.W(46008,3,1) -- turn on enable
+--MB.W(46002,3,8)
+--MB.W(46008,3,1) -- turn on enable
 
 --Connections:
 --  AIN0 = [0] position (0-10V)
@@ -33,6 +33,10 @@ local timestep = 100
 local targetpos = 0
 local vin = 0
 local vout = 0
+local dmax = 50.5
+local dmin = 3
+local vmax = 9.418
+local vmin = 0.032
 -- Change the PID terms according to your process
 local kp = 2
 local ki = 0
@@ -77,12 +81,13 @@ while true do
   if LJ.CheckInterval(0) then
     -- Get a new targetpos from from 46002
     targetpos = MB.R(46002,3)
+    tposV = ((vmax-vmin)/(dmax - dmin))*(targetpos - dmin)
 
     -- Read AIN0 as the feedback source
     currentpos = MB.R(0, 3)
     print("The currentpos is ", currentpos)
     -- Calculate integral term
-    difference = targetpos - currentpos
+    difference = tposV - currentpos
     intterm = intterm + ki * difference
 
     difterm = currentpos - lastin
@@ -103,7 +108,7 @@ while true do
 
     -- Keep track of lastin
     lastin = currentpos
-    print("overshoot =", currentpos - targetpos)
+    print("overshoot =", currentpos - tposV)
     print("")
   end
 end

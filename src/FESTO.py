@@ -71,6 +71,7 @@ if startloc >= 0:
 	elif cpos < startloc:
 		while cpos < startloc :
 			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV+0.5)
+			ljm.eWriteAddress(handle, DAC1addr, f_datatype, offsetV+0.5)
 			cpos = v2d(ljm.eReadAddress(handle, AIN0addr, f_datatype))
 			print("POS_SET: - running...", cpos)
 		ljm.eWriteAddress(handle, DAC0addr, f_datatype, offV)

@@ -4,6 +4,9 @@ disable=
 	wrong-import-position,
 	import-error
 
+extension-pkg-whitelist=
+    cv2
+
 [FORMAT]
 
 # Maximum number of characters on a single line.
