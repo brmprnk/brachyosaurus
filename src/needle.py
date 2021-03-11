@@ -87,9 +87,9 @@ class Needle:
         self.AIN0addr = 0               # position (0-10V)
         self.DAC0addr = 1000            # speed ref.signal (2.5V)
         self.DAC1addr = 1002            # speed out signal (-2.5 - 2.5V)
-        self.initialpos_addr = 46000
+        #self.initialpos_addr = 46000
         self.targetpos_addr = 46002
-        self.speed_addr = 46004
+        #self.speed_addr = 46004
         self.enable_addr = 46008
         self.f_datatype = ljm.constants.FLOAT32
         self.i_datatype = ljm.constants.UINT16
@@ -109,10 +109,10 @@ class Needle:
         if FESTO_handle is not None:
             self.FESTO_handle = FESTO_handle
             # Set initial positions (keep target pos at init_FESTO_pos at the start)
-            ljm.eWriteAddress(self.FESTO_handle, self.initialpos_addr, self.f_datatype, self.init_FESTO_pos)
+            #ljm.eWriteAddress(self.FESTO_handle, self.initialpos_addr, self.f_datatype, self.init_FESTO_pos)
             ljm.eWriteAddress(self.FESTO_handle, self.targetpos_addr, self.f_datatype, self.init_FESTO_pos)
             # Set speed
-            ljm.eWriteAddress(self.FESTO_handle, self.speed_addr, self.f_datatype, self.init_FESTO_speed)
+            #ljm.eWriteAddress(self.FESTO_handle, self.speed_addr, self.f_datatype, self.init_FESTO_speed)
             logger.success("FESTO connected, handle is available, init is set, current position =" + str(ljm.eReadAddress(self.FESTO_handle, self.AIN0addr, self.f_datatype)))
             time.sleep(0.3)
 
@@ -409,7 +409,6 @@ class Needle:
         else:
             logger.error("\n NEEDLE->move_syncV2: neither PUSH nor PULL available; no movement of needle occurred")
 
-
     def initial_position(self):
         """
         Send motors back to zero
@@ -511,7 +510,6 @@ class Needle:
         self.motors[2].get_count()
         self.motors[3].get_count()
 
-
     def festo_move(self, targetpos: int, speed: float, relative=0) -> None:
         """
         Moves the FESTO stage to the "targetpos" with "speed"
@@ -531,6 +529,6 @@ class Needle:
             targetpos = self.currentpos + targetpos
 
         ljm.eWriteAddress(self.FESTO_handle, self.targetpos_addr, self.f_datatype, targetpos)
-        ljm.eWriteAddress(self.FESTO_handle, self.speed_addr, self.f_datatype, speed)
+        #ljm.eWriteAddress(self.FESTO_handle, self.speed_addr, self.f_datatype, speed)
 
         self.currentpos = targetpos
