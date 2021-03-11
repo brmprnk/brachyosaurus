@@ -64,6 +64,8 @@ PARSER.add_argument("-manual", action="store_true", default=True,
                     help="Determines control mode. Automatic is the default.")
 PARSER.add_argument("--comport", type=str, default="COM4", action="store",
                     help="The comport on which the Arduino is connected")
+PARSER.add_argument("-invertx", action="store_true",
+                           help="Invert x-axis values. Akin to switching between front and posterior perspective.")
 PARSER.add_argument("--startsteps", type=str, default="200", action="store",
                     help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
 PARSER.add_argument("--sensitivity", type=str, default="0.1", action="store",

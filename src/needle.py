@@ -188,6 +188,8 @@ class Needle:
         # Start pygame to allow controller and keyboard inputs
         pygame.init()
 
+        process_1.start()
+
         logger.success("Ready to receive inputs.\n")
         while True:
             # Check for needle coordinates in the Multiprocessing Queue
@@ -230,7 +232,7 @@ class Needle:
 
             else:
                 logger.success("Moving to : {}".format(input_method.dir_to_text(direction.direction)))
-                self.move_to_dir_sync(direction)
+                self.move_to_dir_syncv2(direction, report=1)
                 logger.success("\nReady to receive inputs.\n")
 
 
