@@ -76,13 +76,6 @@ PARSER.add_argument("--camfront", action="store", type=str, default="",
                     help="The URL or path to the (live) video of the camera positioned in front of the needle")
 PARSER.add_argument("-nofeed", action="store_true", help="Should the camera feed be displayed on screen")
 
-# Parser for the FESTO command with all the options
-PARSER_FESTO.add_argument("--targetpos", type=int, default=0, action="store",
-                          help="Set the desired position of the linear stage (mm)")
-PARSER_FESTO.add_argument("--initpos", type=int, default=0, action="store",
-                          help="Set the initial position of the linear stage (mm)")
-PARSER_FESTO.add_argument("--speed", type=float, default=0.2, action="store",
-                          help="Set the speed of movement (V)")
 
 # Parser for the NEEDLE command with all the options
 PARSER_NEEDLE.add_argument("-init", action="store_true", help= "INITs Crouzet positions")
@@ -117,9 +110,7 @@ def main() -> None:
 
     subparser = parser.subparse
 
-    if subparser == "FESTO":
-        linear_stage(parser)
-    elif subparser == "NEEDLE":
+    if subparser == "NEEDLE":
         needle_movement(parser)
     elif subparser == "IMAGEPROC":
         image_proc(parser)
@@ -159,16 +150,6 @@ def needle_movement(args: argparse.Namespace) -> None:
     else:
         # Call its movement function
         board_controller.move_freely()
-
-
-
-def linear_stage(args: argparse.Namespace) -> None:
-    """
-    Handler for controlling the linear stage
-    """
-    # Create Needle object
-    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity, args.invertx)
-    board_controller.festo_move(args.targetpos, args.speed)
 
 
 def image_proc(args: argparse.Namespace) -> None:
