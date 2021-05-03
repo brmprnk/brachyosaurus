@@ -22,9 +22,37 @@ Clone or download the project to your local machine.
 This Program runs in Python 3. We are certain the program supports Python 3.8.5, use an older Python 3 version at own risk. Python2 will not run.
 
 
-## Required Packages
+## Required Packages and Installation
+Recommended way to install is using pip.
+Example command would be:
+```console
+foo@bar:~$ pip install labjack-ljm
+```
+     
 - labjack-ljm [(Link)](https://github.com/labjack/labjack-ljm-python)
+- pyfirmata
+- numpy
+- argparse
+- pygame
+- opencv-python
 
+When all is installed, what remains is installing the labjack software from: [(LabJack)](https://labjack.com/support/software/applications/t-series/kipling)
+
+## Running the program
+After installing all required packages, note the run options in the project's main file: src/brachy.py
+
+Ensure the Arduino, Labjack and an input source (keyboard or Xbox One Controller) are connected via USB to the running machine.
+Note the COMPORT where the Arduino is connected, this needs to be passed to the program.
+Make sure the circuitboard is connected to a power source with a voltage of ~9V.
+
+Navigate in the command line or terminal to the src folder, and run the following command:
+```console
+foo@bar:~/brachyosaurus/src$ python brachy.py
+```
+All helpful commands will be listed. An example of running the needle module would be:
+```console
+foo@bar:~/brachyosaurus/src$ python brachy.py NEEDLE --comport=COM4 --sensitivity=0.2
+```
 
 ## Authors
 Team members:
