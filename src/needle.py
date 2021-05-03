@@ -30,6 +30,7 @@ class Needle:
         # Handle input parameters
         self.port = comport_arduino
         self.startcount = startsteps
+        self.init_pos = 0
         self.sensitivity = float(sensitivity)
         if self.sensitivity > 1:
             self.sensitivity = 0.5
@@ -273,6 +274,23 @@ class Needle:
                     logger.success("Init called: Needle motors moving to midpoint then to zero \n"
                                    "                FESTO returning to initial point")
                     self.initial_position()
+                elif dir_output.direction == -3: # The X-Button: a counter part of the Y-button
+                    # Set the init_pos back to 0
+                    self.init_pos = 0
+                    print("The new initial position is 0")
+                elif dir_output.direction == -2: # Special value for pressing the Y-button
+                    # We want a new initial position, update initial position to current position
+                    currentpos = []
+                    for motor_i in range(len(self.motors)):
+                        position = self.motors[motor_i].get_count()
+                        currentpos = currentpos + [position]
+
+                    # When I press init, this is where I want to go instead of 0.
+                    midpoint = int((max(currentpos) + min(currentpos)) / 2)
+                    print("The new initial position instead of 0 is the average of current pos: ", midpoint)
+                    self.init_pos = midpoint
+
+
                 elif dir_output.direction == 200:
                     logger.success("Moving to : {}".format(input_method.dir_to_text(dir_output.direction)))
                     self.festo_move(-3, self.init_FESTO_speed, relative=1)
@@ -422,6 +440,8 @@ class Needle:
             currentpos = currentpos + [position]
 
         midpoint = int((max(currentpos) + min(currentpos))/2)
+        print("Midpoint = ", midpoint)
+
 
         # return to midpoint individually
         print('\nNEEDLE->initial_position: starting to move to midpoint...  midpoint =', midpoint)
@@ -431,11 +451,13 @@ class Needle:
             else:
                 self.motors[motor_i].run_forward(midpoint - currentpos[motor_i])
 
-        # all return simultaneously to zero
+        # all return simultaneously to init_pos
         print('\nNEEDLE->initial_position: starting to move to zero...')
-        for _ in range(midpoint):
-            for motor_i in range(len(self.motors)):
-                self.motors[motor_i].run_backward(1)
+        # for _ in range(midpoint):
+        nr_of_steps_to_init = midpoint - self.init_pos
+        print("I am going to take nr_of_steps_to_init : ", nr_of_steps_to_init)
+        for motor_i in range(len(self.motors)):
+            self.motors[motor_i].run_backward(nr_of_steps_to_init)
 
         print("\nReady to receive input again")
         for motor_i in range(len(self.motors)):

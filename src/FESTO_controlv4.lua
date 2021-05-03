@@ -10,7 +10,7 @@
 
 --_______TESTING_____________
 MB.W(46002,3,8)
-MB.W(46008,3,1) -- turn on enable
+--MB.W(46008,3,1) -- turn on enable
 
 --Connections:
 --  AIN0 = [0] position (0-10V)

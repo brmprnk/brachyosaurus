@@ -99,6 +99,12 @@ class Controller:
                 input_feed.put(self.analog_stick_to_dir(self.joystick.get_axis(0) * -1, self.joystick.get_axis(1) * -1))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
                 input_feed.put(Output(100, [100, 100]))
+            if event.type == pygame.JOYBUTTONDOWN and event.button == 2:
+                print("You pressed X: your init_pos will be set to 0")
+                input_feed.put(Output(-3, [100, 100]))
+            if event.type == pygame.JOYBUTTONDOWN and event.button == 3:
+                print("You pressed Y: so you have a new init_pos")
+                input_feed.put(Output(-2, [100, 100]))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 4:
                 input_feed.put(Output(200, [1, 1]))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 5:
