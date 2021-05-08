@@ -54,6 +54,52 @@ All helpful commands will be listed. An example of running the needle module wou
 foo@bar:~/brachyosaurus/src$ python brachy.py NEEDLE --comport=COM4 --sensitivity=0.2
 ```
 
+## Running predefined test scripts
+This program allows you to run a set of predefined commands for reproducible tests.
+
+To do so, run the following command:
+```console
+foo@bar:~/brachyosaurus/src$ python brachy.py NEEDLE --test=YOUR_TEST_NAME_HERE
+```
+
+YOUR_TEST_NAME_HERE should be an entry in the ```src/config.ini``` file.
+
+Tests need to be written in a uniform column wise manner, and will always run in the order of the following 6 predefined commands:
+
+6 Predefined commands:
+
+     - motor0test : List of steps this motor should take (regardless of current position)
+     - motor0test : List of steps this motor should take
+     - motor0test : List of steps this motor should take
+     - motor0test : List of steps this motor should take
+     - coords : List of tuples of the form (x, y), where the motors will move to in a synced fashion
+     - sleep: List containing seconds, the program sleeps after each column for this amount.
+
+The test inputs should be considered an 6 x N matrix, where N should be the number of positions you want to move to.
+
+     - Run single motor: initialize all other motors and coords array to 1XN zero-array --> make wanted motor test array --> run test
+     - Run multiple motors: initialize EITHER coords-array OR all 4 motor test arrays, set other array(s) to zero-array(s) --> run test
+     - If you want to sleep until the user presses enter, add a 0 to the sleep column
+
+### Example of Test Configuration
+(See src/config.ini as well)
+
+Here are some values of an example test
+|                      |                                           |
+|----------------------|-------------------------------------------|
+| number_of_postions = | 4                                         |
+| motor0test =         | [0, -20, 0, 0]                              |
+| motor1test =         | [0, 0, 400, 1]                            |
+| motor2test =         | [0, 100, 50, 300]                         |
+| motor3test =         | [0, 0, 50, 400]                           |
+| coords =             | [(0,0), (100, 100), (50, 50), (-50, 100)] |
+| sleep =              | [0, 10, 0, 20]                            |
+
+In this test, 4 iterations of positions will be ran.
+The first column contains all zeroes, so will do nothing, and asks the user to press enter to continue (since sleep = 0)
+Then the second position will be ran:
+motor0 will move backwards with 20 steps. motor1 will do nothing. motor2 will move 100 steps forward. motor3 will do nothing. then the motors will move to position (100, 100) synced. The program then sleeps for 10 seconds, before moving onto iteration (position) 3. And so on...
+
 ## Authors
 Team members:
 

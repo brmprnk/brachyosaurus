@@ -323,15 +323,11 @@ class Needle:
 
     def run_predefined_test(self, test, input_method):
         """
-        Tests need to be written, column wise
+        Running predefined test
 
-        6 Predefined commands:
-            -
-            -
-            -
-            -
-            -
-            -
+        :param test: the name of the test to run, passed along by --test and found in config.ini
+        :param input_method: the Controller object made in move_freely, methods of this Controller are used in the function.
+        :return: None, the program exits using sys.exit() 
         """
         logger.success("STARTING PREDEFINED TEST")
 
