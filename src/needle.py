@@ -257,7 +257,7 @@ class Needle:
         # Read required values from config.ini file, and end program after test is done. (if test is defined)
         if self.test != "":
             test = self.config_object[self.test]
-            self.run_predefined_test(test)
+            self.run_predefined_test(test, input_method)
 
         while True:
             # Retrieve user inputs
@@ -321,11 +321,12 @@ class Needle:
         pygame.quit()
         input_method.is_running = False
 
-    def run_predefined_test(self, test):
+    def run_predefined_test(self, test, input_method):
         """
         Tests need to be written, column wise
 
-        5 Predefined commands:
+        6 Predefined commands:
+            -
             -
             -
             -
@@ -340,13 +341,14 @@ class Needle:
         motor1test = ast.literal_eval(test["motor1test"])
         motor2test = ast.literal_eval(test["motor2test"])
         motor3test = ast.literal_eval(test["motor3test"])
+        coords = ast.literal_eval(test["coords"])
         sleep = ast.literal_eval(test["sleep"])
 
         logger.info("Running {} commands".format(number_of_positions))
 
         for position in range(number_of_positions):
 
-            # Run motors
+            # Run motors with specified steps
             if motor0test[position] < 0:
                 self.motors[0].run_backward(motor0test[position])
             else:
@@ -363,6 +365,12 @@ class Needle:
                 self.motors[3].run_backward(motor3test[position])
             else:
                 self.motors[3].run_forward(motor3test[position])
+
+            # Go to coordinates with move_to_dir_sync
+            test_x = coords[position][0] / 100
+            test_y = coords[position][1] / 100
+            gdo_test = input_method.analog_stick_to_dir(test_x, test_y)
+            move_to_dir_syncv2(gdo_test)
 
             # Then sleep
             if sleep[position] == 0:
