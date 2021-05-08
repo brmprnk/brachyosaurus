@@ -2,11 +2,13 @@
 Manager file for the steerable needle.
 """
 import time
+import sys
 import multiprocessing
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from queue import LifoQueue
 import argparse
+import ast
 import pyfirmata
 import pygame
 import numpy as np
@@ -26,7 +28,7 @@ class Needle:
     Functions as a manager for the program, always knows what is the status of needle controlling parts.
     """
 
-    def __init__(self, comport_arduino, startsteps, sensitivity, invertx: bool):
+    def __init__(self, comport_arduino, startsteps, sensitivity, invertx: bool, run_test: str):
         # Handle input parameters
         self.port = comport_arduino
         self.startcount = startsteps
@@ -36,6 +38,7 @@ class Needle:
             self.sensitivity = 0.5
             logger.info("Invalid sensitivity entered: new value = {}".format(self.sensitivity))
         self.invert_x_axis = invertx
+        self.test = run_test
 
         # Setup Arduino and Stepper Motors
         self.board = pyfirmata.Arduino(self.port)
@@ -78,9 +81,9 @@ class Needle:
                             then close the connection with Kipling 3 software
         """
         # config
-        config_object = ConfigParser()
-        config_object.read('config.ini')
-        festo = config_object["FESTO"]
+        self.config_object = ConfigParser()
+        self.config_object.read('config.ini')
+        festo = self.config_object["FESTO"]
 
         self.init_FESTO_pos = int(festo["initial_pos"])
         self.init_FESTO_speed = float(festo["initial_speed"])
@@ -251,6 +254,11 @@ class Needle:
         input_method = Controller(self.invert_x_axis)
         input_feed = LifoQueue(maxsize=0) # Create LIFO queue of infinite size that reads controller input
 
+        # Read required values from config.ini file, and end program after test is done. (if test is defined)
+        if self.test != "":
+            test = self.config_object[self.test]
+            self.run_predefined_test(test)
+
         while True:
             # Retrieve user inputs
             events = pygame.event.get()
@@ -260,6 +268,9 @@ class Needle:
 
             if not input_feed.empty(): # An input was entered
                 dir_output = input_feed.get()
+
+                # if (args.predefinedtest == True):
+                    # do_predefined shit
 
                 # Sentinel value was put in Queue, exit program
                 if dir_output is None:
@@ -309,6 +320,62 @@ class Needle:
         # Neatly exiting main program loop
         pygame.quit()
         input_method.is_running = False
+
+    def run_predefined_test(self, test):
+        """
+        Tests need to be written, column wise
+
+        5 Predefined commands:
+            -
+            -
+            -
+            -
+            -
+        """
+        logger.success("STARTING PREDEFINED TEST")
+
+        # Load command arrays
+        number_of_positions = int(test["number_of_positions"])
+        motor0test = ast.literal_eval(test["motor0test"])
+        motor1test = ast.literal_eval(test["motor1test"])
+        motor2test = ast.literal_eval(test["motor2test"])
+        motor3test = ast.literal_eval(test["motor3test"])
+        sleep = ast.literal_eval(test["sleep"])
+
+        logger.info("Running {} commands".format(number_of_positions))
+
+        for position in range(number_of_positions):
+
+            # Run motors
+            if motor0test[position] < 0:
+                self.motors[0].run_backward(motor0test[position])
+            else:
+                self.motors[0].run_forward(motor0test[position])
+            if motor1test[position] < 0:
+                self.motors[1].run_backward(motor1test[position])
+            else:
+                self.motors[1].run_forward(motor1test[position])
+            if motor2test[position] < 0:
+                self.motors[2].run_backward(motor2test[position])
+            else:
+                self.motors[2].run_forward(motor2test[position])
+            if motor3test[position] < 0:
+                self.motors[3].run_backward(motor3test[position])
+            else:
+                self.motors[3].run_forward(motor3test[position])
+
+            # Then sleep
+            if sleep[position] == 0:
+                input("Press Enter to continue...")
+            else:
+                time.sleep(sleep[position])
+
+        # Neatly exiting main program loop
+        logger.success("ENDING PREDEFINED TEST")
+        pygame.quit()
+
+        logger.success("Exiting Program...")
+        sys.exit()
 
     def move_to_dir_syncv2(self, gdo, report=0):
         """

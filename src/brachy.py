@@ -81,6 +81,8 @@ PARSER.add_argument("-nofeed", action="store_true", help="Should the camera feed
 PARSER_NEEDLE.add_argument("-init", action="store_true", help= "INITs Crouzet positions")
 PARSER_NEEDLE.add_argument("-invertx", action="store_true",
                            help="Invert x-axis values. Akin to switching between front and posterior perspective.")
+PARSER_NEEDLE.add_argument("--test", type=str, action="store", default="",
+                           help= "Set this parameter if you want to run a test from the config.ini")
 PARSER_NEEDLE.add_argument("--comport", type=str, default="COM4", action="store",
                            help="The comport on which the Arduino is connected")
 PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="store",
@@ -144,7 +146,7 @@ def needle_movement(args: argparse.Namespace) -> None:
     Handler for main purpose of program
     """
     # Create Needle object
-    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity, args.invertx)
+    board_controller = needle.Needle(args.comport, args.startsteps, args.sensitivity, args.invertx, args.test)
     if args.init:
         board_controller.initial_position()
     else:
