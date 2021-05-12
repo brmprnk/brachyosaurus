@@ -153,7 +153,6 @@ class Controller:
         # steps to do according to amplitude of the joystick
 
         if distance_from_origin < self.deadzone:
-            logger.error("Direction not clear --> Analog stick not far away from center. Try again.")
             return Output(Direction.NULL.value, [0, 0])
 
         # xy_coords to steps to output per x or y motors
