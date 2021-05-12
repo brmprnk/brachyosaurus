@@ -346,20 +346,28 @@ class Needle:
 
             # Run motors with specified steps
             if motor0test[position] < 0:
+                logger.info("Motor 0 took {} steps".format(motor0test[position]))
                 self.motors[0].run_backward(motor0test[position])
             else:
+                logger.info("Motor 0 took {} steps".format(motor0test[position]))
                 self.motors[0].run_forward(motor0test[position])
             if motor1test[position] < 0:
+                logger.info("Motor 1 took {} steps".format(motor1test[position]))
                 self.motors[1].run_backward(motor1test[position])
             else:
+                logger.info("Motor 1 took {} steps".format(motor1test[position]))
                 self.motors[1].run_forward(motor1test[position])
             if motor2test[position] < 0:
+                logger.info("Motor 2 took {} steps".format(motor2test[position]))
                 self.motors[2].run_backward(motor2test[position])
             else:
+                logger.info("Motor 2 took {} steps".format(motor2test[position]))
                 self.motors[2].run_forward(motor2test[position])
             if motor3test[position] < 0:
+                logger.info("Motor 3 took {} steps".format(motor3test[position]))
                 self.motors[3].run_backward(motor3test[position])
             else:
+                logger.info("Motor 3 took {} steps".format(motor3test[position]))
                 self.motors[3].run_forward(motor3test[position])
 
             # Go to coordinates with move_to_dir_sync
@@ -370,12 +378,14 @@ class Needle:
 
             # Check if the motors should move to a position
             if test_x != 0 and test_y != 0:
+                logger.info("Motors are moving to position ({}, {})".format(test_x, test_y))
                 self.move_to_dir_syncv2(gdo_test)
 
             # Then sleep
             if sleep[position] == 0:
                 input("Press Enter to continue...")
             else:
+                logger.info("Sleeping for {} seconds...".format(sleep[position]))
                 time.sleep(sleep[position])
 
         # Neatly exiting main program loop
