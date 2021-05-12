@@ -374,7 +374,6 @@ class Needle:
             test_x = coords[position][0] / 100
             test_y = coords[position][1] / 100
             gdo_test = input_method.analog_stick_to_dir(test_x, test_y)
-            self.move_to_dir_syncv2(gdo_test)
 
             # Check if the motors should move to a position
             if test_x != 0 and test_y != 0:
