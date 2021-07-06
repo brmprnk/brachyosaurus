@@ -9,7 +9,7 @@ import time
 import multiprocessing
 import cv2
 from src.util import logger
-from src.image_proc2 import position_from_image
+from src.image_pos.image_proc2 import position_from_image
 
 class ImageAcquisition:
     """

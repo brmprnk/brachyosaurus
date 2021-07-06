@@ -6,7 +6,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import src.util.logger as logger
-class Motor:
+class Steppermotor:
     """
     Class that represent stepper motor
     """

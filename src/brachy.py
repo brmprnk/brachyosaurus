@@ -24,7 +24,7 @@ from src.util import logger
 # from src.util.saving import Saving
 import src.needle as needle
 from src.reset_arduino import func as reset_arduino
-from src.image_proc2 import position_from_image
+from src.image_pos.image_proc2 import position_from_image
 # TODO: import configparser and use it to update parameters
 
 # pylint: disable=unused-argument
@@ -62,7 +62,7 @@ PARSER_IMAGEPROC = SUBPARSERS.add_parser("IMAGEPROC", help="Test the image proce
 PARSER.add_argument("-init", action="store_true", help="Initializes Crouzet Stepper Motor positions.")
 PARSER.add_argument("-manual", action="store_true", default=True,
                     help="Determines control mode. Automatic is the default.")
-PARSER.add_argument("--comport", type=str, default="COM4", action="store",
+PARSER.add_argument("--comport", type=str, default="/dev/tty.usbserial-14323410", action="store",
                     help="The comport on which the Arduino is connected")
 PARSER.add_argument("--startsteps", type=str, default="200", action="store",
                     help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
@@ -106,7 +106,7 @@ def main() -> None:
 
     :return: None
     """
-    # Print all the user's entered arguments in a neatly organized fashion
+    # Print all the user entered arguments in a neatly organized fashion
     parser = PARSER.parse_args()
     input_processing.input_log(parser)
 

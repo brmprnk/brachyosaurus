@@ -15,10 +15,10 @@ import numpy as np
 from labjack import ljm
 from configparser import ConfigParser
 
-from src.controls import stepper_motor
+from src.controls.stepper_motor import Steppermotor
 from src.controls.controller import Controller
+from src.image_pos.image_acquisition import ImageAcquisition
 from src.util import logger
-from src.image_acquisition import ImageAcquisition
 
 
 class Needle:
@@ -130,16 +130,16 @@ class Needle:
         """
         Initializes default motor to Arduino board configuration
         """
-        motor0 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(7)),
+        motor0 = Steppermotor(self.board.get_pin('d:{}:o'.format(7)),
                                      self.board.get_pin('d:{}:o'.format(6)),
                                      self.startcount, 0)
-        motor1 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(5)),
+        motor1 = Steppermotor(self.board.get_pin('d:{}:o'.format(5)),
                                      self.board.get_pin('d:{}:o'.format(4)),
                                      self.startcount, 1)
-        motor2 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(3)),
+        motor2 = Steppermotor(self.board.get_pin('d:{}:o'.format(3)),
                                      self.board.get_pin('d:{}:o'.format(2)),
                                      self.startcount, 2)
-        motor3 = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(9)),
+        motor3 = Steppermotor(self.board.get_pin('d:{}:o'.format(9)),
                                      self.board.get_pin('d:{}:o'.format(8)),
                                      self.startcount, 3)
         self.motors.extend([motor0, motor1, motor2, motor3])
@@ -148,7 +148,7 @@ class Needle:
         """
         Add specific stepper_motor to Motor array
         """
-        motor = stepper_motor.Motor(self.board.get_pin('d:{}:o'.format(dirpin)),
+        motor = Steppermotor(self.board.get_pin('d:{}:o'.format(dirpin)),
                                     self.board.get_pin('d:{}:o'.format(steppin)), startcount, index)
         self.motors.insert(index, motor)
 
@@ -340,7 +340,7 @@ class Needle:
         coords = ast.literal_eval(test["coords"])
         sleep = ast.literal_eval(test["sleep"])
 
-        logger.info("Running {} commands".format(number_of_positions))
+        logger.info("Running {} positions".format(number_of_positions))
 
         for position in range(number_of_positions):
 
