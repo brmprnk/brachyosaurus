@@ -62,7 +62,7 @@ PARSER_IMAGEPROC = SUBPARSERS.add_parser("IMAGEPROC", help="Test the image proce
 PARSER.add_argument("-init", action="store_true", help="Initializes Crouzet Stepper Motor positions.")
 PARSER.add_argument("-manual", action="store_true", default=True,
                     help="Determines control mode. Automatic is the default.")
-PARSER.add_argument("--comport", type=str, default="/dev/tty.usbserial-14323410", action="store",
+PARSER.add_argument("--comport", type=str, default="COM9", action="store",
                     help="The comport on which the Arduino is connected")
 PARSER.add_argument("--startsteps", type=str, default="200", action="store",
                     help="The amount of steps (max 200) performed forwards after the Crouzets are INIT at zero ")
@@ -83,7 +83,7 @@ PARSER_NEEDLE.add_argument("-invertx", action="store_true",
                            help="Invert x-axis values. Akin to switching between front and posterior perspective.")
 PARSER_NEEDLE.add_argument("--test", type=str, action="store", default="",
                            help= "Set this parameter if you want to run a test from the config.ini")
-PARSER_NEEDLE.add_argument("--comport", type=str, default="COM4", action="store",
+PARSER_NEEDLE.add_argument("--comport", type=str, default="COM9", action="store",
                            help="The comport on which the Arduino is connected")
 PARSER_NEEDLE.add_argument("--startsteps", type=str, default="200", action="store",
                            help="The amount of steps (max 400) performed forwards after the Crouzets are INIT at zero ")

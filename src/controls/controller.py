@@ -106,8 +106,10 @@ class Controller:
                 print("You pressed Y: so you have a new init_pos")
                 input_feed.put(Output(-2, [100, 100]))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 4:
+                print("You pressed LB: the FESTO linear stage will be moved back")
                 input_feed.put(Output(200, [1, 1]))
             if event.type == pygame.JOYBUTTONDOWN and event.button == 5:
+                print("You pressed RB: the FESTO linear stage will be moved forwards")
                 input_feed.put(Output(201, [1, 1]))
 
     @staticmethod

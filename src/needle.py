@@ -87,6 +87,7 @@ class Needle:
 
         self.init_FESTO_pos = int(festo["initial_pos"])
         self.init_FESTO_speed = float(festo["initial_speed"])
+        self.FESTO_stepsize = int(festo["step_size"])
 
         self.AIN0addr = 0               # position (0-10V)
         self.DAC0addr = 1000            # speed ref.signal (2.5V)
@@ -124,6 +125,7 @@ class Needle:
             ljm.eWriteAddress(self.FESTO_handle, self.enable_addr, self.f_datatype, 1)
             logger.success("FESTO moving to initial position")
         else:
+            logger.error("Something went wrong when creating a FESTO Handle. Check if all adresses are correct in needle.py")
             self.FESTO_handle = None
 
     def default_motor_setup(self):
@@ -304,12 +306,12 @@ class Needle:
 
                 elif dir_output.direction == 200:
                     logger.success("Moving to : {}".format(input_method.dir_to_text(dir_output.direction)))
-                    self.festo_move(-3, self.init_FESTO_speed, relative=1)
+                    self.festo_move(-self.FESTO_stepsize, self.init_FESTO_speed, relative=1)
                     time.sleep(0.05)
                     continue
                 elif dir_output.direction == 201:
                     logger.success("Moving to : {}".format(input_method.dir_to_text(dir_output.direction)))
-                    self.festo_move(3, self.init_FESTO_speed, relative=1)
+                    self.festo_move(self.FESTO_stepsize, self.init_FESTO_speed, relative=1)
                     time.sleep(0.05)
                     continue
                 else:
